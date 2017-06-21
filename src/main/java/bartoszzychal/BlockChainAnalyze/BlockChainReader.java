@@ -101,7 +101,7 @@ public class BlockChainReader {
 		}
 		final List<Block> result = blockMap.values().parallelStream().flatMap(List::stream).collect(Collectors.toList());
 		int countOfFound = result.size();
-		System.out.println("Finded " + countOfFound + " blocks from date: " + from + " to date: " + to);
+		System.out.println("Found " + countOfFound + " blocks from date: " + from + " to date: " + to);
 		System.out.println("Blocks from cache " + (countOfFound - counter) + ".");
 		System.out.println("Readed " + counter + " blocks from BlockChain.");
 		
