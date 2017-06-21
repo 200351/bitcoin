@@ -7,7 +7,7 @@
 *.pdf binary
 *.phar binary
 *.class binary
-target/ binaryDirectory
+*/target/**
 .settings/
 .project
 .classpath
