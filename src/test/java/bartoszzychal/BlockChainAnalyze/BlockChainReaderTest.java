@@ -10,7 +10,6 @@ import org.junit.Test;
 public class BlockChainReaderTest {
 
 	
-	
 	@Test
 	public void testReadBlockChainFromTo() {
 		// first block 2009-01-03
