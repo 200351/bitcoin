@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import bartoszzychal.BlockChainAnalyze.BlockchainHelper;
 import bartoszzychal.BlockChainAnalyze.blockchainreader.impl.BlockChainReverseReader;
+import bartoszzychal.BlockChainAnalyze.model.Blockchain;
 
 /**
  * <p>This class reads block files stored in the Bitcoin Core format. This is simply a way to concatenate
@@ -42,7 +43,6 @@ public class BlockFileReverseLoader implements Iterable<Block>, Iterator<Block> 
     private FileInputStream currentFileStream = null;
     private Block nextBlock = null;
     private NetworkParameters params;
-    
 	private static final Logger log = LoggerFactory.getLogger(BlockFileReverseLoader.class);
 
     public BlockFileReverseLoader(NetworkParameters params, List<File> files) {
@@ -99,8 +99,8 @@ public class BlockFileReverseLoader implements Iterable<Block>, Iterator<Block> 
 	private void loadBlocks() {
 		if (currentFileStream != null) {
 			try {
-				final List<Block> blocks = BlockchainHelper.recreateBlockchain(prepareBlocks(), true);
-				this.blocks = blocks.iterator();
+				final Blockchain blockchain = BlockchainHelper.recreateBlockchain(prepareBlocks(), true);
+				this.blocks = blockchain.getBlocks().iterator();
 			} catch (IOException e) {
 				System.out.println(e);
 			}

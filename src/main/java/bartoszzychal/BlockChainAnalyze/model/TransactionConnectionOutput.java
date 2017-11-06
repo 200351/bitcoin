@@ -2,8 +2,6 @@ package bartoszzychal.BlockChainAnalyze.model;
 
 import java.util.List;
 
-import org.bitcoinj.core.Sha256Hash;
-
 public class TransactionConnectionOutput {
 
 	private final TransactionConnectionInput transactionConnectionInput;

@@ -1,6 +1,10 @@
 package bartoszzychal.BlockChainAnalyze;
 
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -45,6 +49,7 @@ public class BlocksConnectionFinder {
 		}
 		log.info("Start find with date " + to);
 
+		final LocalDateTime startTime = LocalDateTime.now();
 		
 		final Set<TransactionSearchInfo> connectionsToFind = new HashSet<>();
 		final Set<TransactionConnection> foundConnection = new HashSet<>();
@@ -115,12 +120,14 @@ public class BlocksConnectionFinder {
 					}
 				}
 				log.info("In Block " + block.getHashAsString());
-				log.info("Found Connection: " + foundConnection.size());
+				log.info("Count of all found connections: " + foundConnection.size());
 				// remove found connection
-				log.info("New Connection to find: " + newConnectionsToFind.size());
+				log.info("Count of new connections to find: " + newConnectionsToFind.size());
 				// add new connections to find
 				connectionsToFind.addAll(newConnectionsToFind);
-
+				final LocalDateTime logTime = LocalDateTime.now();
+				final Duration duration = Duration.between(startTime, logTime);
+				log.info("Work time: " + duration.get(ChronoUnit.SECONDS));
 			}
 			to = to.minusDays(1);
 		}

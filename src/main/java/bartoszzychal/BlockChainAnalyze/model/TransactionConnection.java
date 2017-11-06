@@ -1,25 +1,29 @@
 package bartoszzychal.BlockChainAnalyze.model;
 
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.bitcoinj.core.Coin;
 import org.bitcoinj.core.Sha256Hash;
 
+import bartoszzychal.BlockChainAnalyze.mapper.InfoMapper;
+
 public class TransactionConnection {
+
 	private Sha256Hash inputBlockHash;
 	private Sha256Hash outputBlockHash;
 	private Sha256Hash inputTransactionHash;
 	private Sha256Hash outputTransactionHash;
-	private Set<String> inputAddresses;
-	private Set<String> outputAddresses;
-	private Set<String> connectedAddresses;
+
 	private long inputTime;
 	private long outputTime;
 
+	private Set<InputInfo> inputInfo;
+	private Set<OutputInfo> outputInfo;
+	private Set<ConnectedInfo> connectedInfo;
+
 	public TransactionConnection(TransactionSearchInfo tc) {
-		this.setInputAddresses(tc.getAddresses());
+		this.setInputInfo(InfoMapper.map(tc));
 		this.setInputBlockHash(tc.getBlockHash());
 		this.setInputTransactionHash(tc.getTransactionHash());
 		this.setInputTime(tc.getTime());
@@ -28,22 +32,8 @@ public class TransactionConnection {
 	public TransactionConnection() {
 	}
 
-	public boolean isPreviousConnected(final Set<Sha256Hash> outputHashes) {
-		if (CollectionUtils.isNotEmpty(outputHashes)) {
-			return new HashSet<>(inputAddresses).retainAll(outputHashes);
-		}
-		return false;
-	}
-
-	public boolean isNextConnected(final List<Sha256Hash> inputHashes) {
-		if (CollectionUtils.isNotEmpty(inputHashes)) {
-			return new HashSet<>(outputAddresses).retainAll(inputHashes);
-		}
-		return false;
-	}
-
 	public boolean isConnected() {
-		return connectedAddresses != null && connectedAddresses.size() > 0;
+		return connectedInfo != null && connectedInfo.size() > 0;
 	}
 
 	public Sha256Hash getInputBlockHash() {
@@ -78,30 +68,6 @@ public class TransactionConnection {
 		this.outputTransactionHash = outputTransactionHash;
 	}
 
-	public Set<String> getInputAddresses() {
-		return inputAddresses;
-	}
-
-	public void setInputAddresses(Set<String> inputAddresses) {
-		this.inputAddresses = inputAddresses;
-	}
-
-	public Set<String> getOutputAddresses() {
-		return outputAddresses;
-	}
-
-	public void setOutputAddresses(Set<String> outputAddresses) {
-		this.outputAddresses = outputAddresses;
-	}
-
-	public Set<String> getConnectedAddresses() {
-		return connectedAddresses;
-	}
-
-	public void setConnectedAddresses(Set<String> connectedAddresses) {
-		this.connectedAddresses = connectedAddresses;
-	}
-
 	public long getInputTime() {
 		return inputTime;
 	}
@@ -117,15 +83,62 @@ public class TransactionConnection {
 	public void setOutputTime(long outputTime) {
 		this.outputTime = outputTime;
 	}
+	
+
+	public Set<InputInfo> getInputInfo() {
+		return inputInfo;
+	}
+
+	public void setInputInfo(Set<InputInfo> inputInfo) {
+		this.inputInfo = inputInfo;
+	}
+
+	public Set<OutputInfo> getOutputInfo() {
+		return outputInfo;
+	}
+
+	public void setOutputInfo(Set<OutputInfo> outputInfo) {
+		this.outputInfo = outputInfo;
+	}
+
+	public Set<ConnectedInfo> getConnectedInfo() {
+		return connectedInfo;
+	}
+
+	public void setConnectedInfo(Set<ConnectedInfo> connectedInfo) {
+		this.connectedInfo = connectedInfo;
+	}
 
 	@Override
 	public String toString() {
 		return "TransactionConnection [inputBlockHash=" + inputBlockHash + ", outputBlockHash=" + outputBlockHash
 				+ ", inputTransactionHash=" + inputTransactionHash + ", outputTransactionHash=" + outputTransactionHash
-				+ ", inputAddresses=" + inputAddresses + ", outputAddresses=" + outputAddresses
-				+ ", connectedAddresses=" + connectedAddresses + ", inputTime=" + inputTime + ", outputTime="
-				+ outputTime + "]";
+				+ ", inputAddresses=" + inputInfo + ", outputAddresses=" + outputInfo + ", connectedAddresses="
+				+ reduceAddresses(connectedInfo) + ", connectedCoin=" + countCoins(connectedInfo).toFriendlyString() + ", inputCoins="
+				+ countCoins(inputInfo).toFriendlyString() + ", outputCoin=" + countCoins(outputInfo).toFriendlyString()
+				+ ", inputTime=" + inputTime + ", outputTime=" + outputTime + "]";
 	}
 
-	
+	private Coin countCoins(Set<? extends AbstractInfo> info) {
+		Coin coins = Coin.ZERO;
+		if (CollectionUtils.isNotEmpty(info)) {
+			coins = info.stream().map(i -> i.getCoins() != null ? i.getCoins() : Coin.ZERO).reduce((a, b) -> a.plus(b)).orElse(Coin.ZERO);
+		}
+		return coins;
+	}
+
+	private String reduceAddresses(Set<? extends AbstractInfo> info) {
+		String addresses = "";
+		if (CollectionUtils.isNotEmpty(info)) {
+			addresses = info.stream().map(c -> c.getAddress()).reduce((a1, a2) -> a1 + ", " + a2).get();
+		}
+		return addresses;
+	}
+
+	public String toShortString() {
+		return "InputTransactionHash=" + inputTransactionHash + ", outputTransactionHash=" + outputTransactionHash
+				+ ", outputCoin=" + countCoins(outputInfo).toFriendlyString() + ", connectedAddresses=" + reduceAddresses(connectedInfo)
+				+ ", connectedCoin=" + countCoins(connectedInfo).toFriendlyString();
+	}
+
 }

@@ -43,14 +43,14 @@ public class BlocksConnectionFinderTest {
 				LocalDate.of(2015, 10, 10),
 				Sha256Hash.wrap("000000000000000004a89bd78bbaa336afb8ca11ef1e06af4f4617783a9dce12"),
 				Sha256Hash.wrap("82e8621ba492cdd8101a78f7ecb886bb37cb5d577e4022db91cc9a6f81b9c5c6"), 
-				10000);
+				1000000);
 
 		final TransactionConnectionOutput findConnections = blocksConnectionFinder
 				.findConnections(transactionConnectionInput);
 		
 		List<TransactionConnection> connections = findConnections.getConnections();
 		System.out.println("Founded " + connections.size() + " Connections");
-		connections.stream().forEach(System.out::println);
+		connections.stream().forEach(c -> System.out.println(c.toShortString()));
 		
 	}
 

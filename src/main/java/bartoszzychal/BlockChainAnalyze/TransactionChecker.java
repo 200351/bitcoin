@@ -7,16 +7,18 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.SetUtils;
-import org.bitcoinj.core.Address;
 import org.bitcoinj.core.Block;
 import org.bitcoinj.core.Transaction;
 import org.bitcoinj.core.TransactionOutput;
-import org.bitcoinj.params.MainNetParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import bartoszzychal.BlockChainAnalyze.mapper.InfoMapper;
+import bartoszzychal.BlockChainAnalyze.model.InputInfo;
+import bartoszzychal.BlockChainAnalyze.model.OutputInfo;
 import bartoszzychal.BlockChainAnalyze.model.TransactionConnection;
 import bartoszzychal.BlockChainAnalyze.model.TransactionSearchInfo;
+import bartoszzychal.BlockChainAnalyze.utils.Utils;
 
 public class TransactionChecker {
 	private static final Logger log = LoggerFactory.getLogger(BlocksConnectionFinder.class);
@@ -28,34 +30,37 @@ public class TransactionChecker {
 		final TransactionConnection tc = new TransactionConnection(searchInfo);
 		
 		// get all input addresses
-		final Set<String> inputsAddresses = searchInfo.getAddresses();
+		final Set<InputInfo> inputsInfo = tc.getInputInfo();
 		
 		//get all TransactionsOutputs from Transaction
 		final List<TransactionOutput> outputs = transaction.getOutputs();
 		
 		// prepare all possible output addresses from TransactionsOutputs
-		final Set<String> outputsAddresses = outputs != null ? outputs.stream().map(t -> {
-			final Address address = t.getAddressFromP2PKHScript(MainNetParams.get());
-			return address != null ? address.toString() : null;
-		}).filter(a -> a != null).collect(Collectors.toSet()) : SetUtils.EMPTY_SORTED_SET;
+		final Set<OutputInfo> outputsInfo = outputs != null
+				? outputs.stream().map(InfoMapper::map).filter(Utils.isNotNull()).collect(Collectors.toSet())
+				: SetUtils.EMPTY_SORTED_SET;
 		
 		// if addresses exists
-		if (CollectionUtils.isNotEmpty(inputsAddresses) && CollectionUtils.isNotEmpty(outputsAddresses)) {
-			final Set<String> connection = new HashSet<>(inputsAddresses);
-			connection.retainAll(outputsAddresses);
+		if (CollectionUtils.isNotEmpty(inputsInfo) && CollectionUtils.isNotEmpty(outputsInfo)) {
+			final Set<OutputInfo> connection = new HashSet<>(outputsInfo);
+			connection.retainAll(inputsInfo);
 			// and it's at least one mutual address
 			if (connection.size() > 0) {
-				tc.setConnectedAddresses(connection);
-				tc.setOutputAddresses(outputsAddresses);
+				tc.setConnectedInfo(connection.stream().map(InfoMapper::map).collect(Collectors.toSet()));
+				tc.setOutputInfo(outputsInfo);
 				tc.setOutputTransactionHash(transaction.getHash());
 				tc.setOutputBlockHash(block.getHash());
 				tc.setOutputTime(block.getTimeSeconds());
-				log.info("Found connection between input transactions: " + tc.getInputTransactionHash());
-				log.info("Found connection between output transactions: " + tc.getOutputTransactionHash());
-				log.info("Found connection with " + tc.getConnectedAddresses().size() + " Addresses: " + tc.getConnectedAddresses());
+				log.debug("Found connection between input transactions: " + tc.getInputTransactionHash());
+				log.debug("Found connection between output transactions: " + tc.getOutputTransactionHash());
+				log.debug("Found connection with " + tc.getConnectedInfo().size() + " Addresses: "
+						+ tc.getConnectedInfo().stream().map(c -> c.getAddress()).reduce((a1, a2) -> a1 + ", " + a2).get());
 			}
 		}
 		
 		return tc;
 	}
+
+
+
 }
