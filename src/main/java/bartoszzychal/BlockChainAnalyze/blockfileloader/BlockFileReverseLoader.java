@@ -82,10 +82,12 @@ public class BlockFileReverseLoader implements Iterable<Block>, Iterator<Block> 
 		nextBlock = null;
 		blocks = null;
 		currentFileStream = null;
-		if (fileIt != null  && fileIt.hasNext()) {
-			 try {
-                 currentFileStream = new FileInputStream(fileIt.next());
-             } catch (FileNotFoundException e) {
+		if (fileIt != null && fileIt.hasNext()) {
+			try {
+				File file = fileIt.next();
+				log.info("Read from file: " + file.getName());
+				currentFileStream = new FileInputStream(file);
+			} catch (FileNotFoundException e) {
                  currentFileStream = null;
              }
 		}
@@ -99,7 +101,7 @@ public class BlockFileReverseLoader implements Iterable<Block>, Iterator<Block> 
 	private void loadBlocks() {
 		if (currentFileStream != null) {
 			try {
-				final Blockchain blockchain = BlockchainHelper.recreateBlockchain(prepareBlocks(), true);
+				final Blockchain blockchain = BlockchainHelper.recreateBlockchain(prepareBlocks(), true, true);
 				this.blocks = blockchain.getBlocks().iterator();
 			} catch (IOException e) {
 				System.out.println(e);

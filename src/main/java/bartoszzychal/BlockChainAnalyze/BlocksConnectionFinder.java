@@ -4,7 +4,6 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -17,6 +16,7 @@ import org.bitcoinj.core.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import bartoszzychal.BlockChainAnalyze.blockchainreader.IBlockChainReader;
 import bartoszzychal.BlockChainAnalyze.blockchainreader.impl.BlockChainReverseReader;
 import bartoszzychal.BlockChainAnalyze.generator.TransactionSearchInfoGenerator;
 import bartoszzychal.BlockChainAnalyze.model.TransactionConnection;
@@ -35,9 +35,14 @@ public class BlocksConnectionFinder {
 
 	}
 
-	public TransactionConnectionOutput findConnections(TransactionConnectionInput transactionConnectionInput) {
+	public TransactionConnectionOutput findConnections(final TransactionConnectionInput transactionConnectionInput,
+			final IBlockChainReader blockchainReader) {
+		
+		if (blockchainReader == null) {
+			throw new IllegalArgumentException("BlockchainReader == null");
+		}
+		
 		TransactionConnectionOutput transactionConnectionOutput = null;
-		final BlockChainReverseReader blockChainReversReader = new BlockChainReverseReader();
 		final long limit = transactionConnectionInput.getConnectionsLimit();
 		final Sha256Hash startBlockHash = transactionConnectionInput.getStartBlockHash();
 		final Sha256Hash startTransactionHash = transactionConnectionInput.getStartTransactionHash();
@@ -54,7 +59,7 @@ public class BlocksConnectionFinder {
 		final Set<TransactionSearchInfo> connectionsToFind = new HashSet<>();
 		final Set<TransactionConnection> foundConnection = new HashSet<>();
 		while (counter < limit) {
-			final List<Block> blocks = blockChainReversReader.readBlockChainFromTo(to.minusDays(1), to);
+			final List<Block> blocks = blockchainReader.readBlockChainFromTo(to.minusDays(1), to);
 			for (Block block : blocks) {
 				if (counter > limit) break;
 				// Find the start block.

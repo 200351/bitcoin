@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.bitcoinj.core.Block;
+import org.spongycastle.asn1.cms.IssuerAndSerialNumber;
 
 import bartoszzychal.BlockChainAnalyze.blockchainreader.IBlockChainReader;
 

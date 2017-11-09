@@ -141,4 +141,12 @@ public class TransactionConnection {
 				+ ", connectedCoin=" + countCoins(connectedInfo).toFriendlyString();
 	}
 
+	public String toRCoinsString() {
+		return inputTransactionHash + " " + outputTransactionHash + " " + countCoins(connectedInfo).toPlainString();
+	}
+	
+	public String toRTimeString() {
+		return inputTransactionHash + " " + outputTransactionHash + " " + outputTime;
+	}
+
 }

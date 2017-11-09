@@ -1,5 +1,8 @@
 package bartoszzychal.BlockChainAnalyze.utils;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.TimeZone;
 import java.util.function.Predicate;
 
 import org.bitcoinj.core.TransactionInput;
@@ -13,5 +16,10 @@ public class Utils {
 
 	public static Predicate<? super TransactionInput> isNotCoinBase() {
 		return t -> !t.isCoinBase();
+	}
+	
+	public static LocalDateTime parse(long time) {
+		return LocalDateTime.ofInstant(Instant.ofEpochMilli(time), 
+                TimeZone.getDefault().toZoneId());  
 	}
 }

@@ -24,7 +24,8 @@ public class BlockChainReverseReader extends AbstractBlockChainReader implements
 	final static NetworkParameters np = new MainNetParams();
 	final static Context context = new Context(np);
 	private static IBlockChainReader blockChainReverseReader = null;
-
+	private static boolean isReturned = false;
+	
 	private static final Logger log = LoggerFactory.getLogger(BlockChainReverseReader.class);
 	
 	public BlockChainReverseReader(Iterator<Block> blockFileLoader) {
@@ -52,7 +53,9 @@ public class BlockChainReverseReader extends AbstractBlockChainReader implements
 		final LocalDate toRange = to.plusDays(1);
 
 		// reduce the blockMap
-		reduceMap(fromRange, toRange);
+		if (isReturned) {
+			reduceMap(fromRange, toRange);
+		}
 
 		int counter = 0;
 		// add last not saved block
@@ -72,7 +75,7 @@ public class BlockChainReverseReader extends AbstractBlockChainReader implements
 		log.info("Found " + countOfFound + " blocks from date: " + from + " to date: " + to);
 		log.info("Blocks from cache " + (countOfFound - counter) + ".");
 		log.info("Readed " + counter + " blocks from BlockChain.");
-
+		isReturned = true;
 		return result;
 	}
 
@@ -92,6 +95,7 @@ public class BlockChainReverseReader extends AbstractBlockChainReader implements
 			if (dateFromBlock.isAfter(fromRange) && dateFromBlock.isBefore(toRange)) {
 				addToMap(block, dateFromBlock);
 				counter++;
+				isReturned = false;
 			} else if (dateFromBlock.isBefore(from)) {
 				blockFromPrevious = block;
 				end = true;
