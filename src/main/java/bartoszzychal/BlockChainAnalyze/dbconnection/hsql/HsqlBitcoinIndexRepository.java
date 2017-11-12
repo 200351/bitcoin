@@ -53,7 +53,8 @@ public class HsqlBitcoinIndexRepository implements IBitCoinIndexRepository {
 			final Query query = getEntityManager()
 					.createQuery("select bi from BlockIndex bi"
 							+ " where bi.generatedDate >= :" + BLOCK_START_PARAM
-							+ " and bi.generatedDate <= :" + BLOCK_END_PARAM);
+							+ " and bi.generatedDate <= :" + BLOCK_END_PARAM
+							+ " order by bi.generatedDate desc");
 			query.setParameter(BLOCK_START_PARAM, startDate);
 			query.setParameter(BLOCK_END_PARAM, endDate);
 			final List<BlockIndex> resultList = query.getResultList();

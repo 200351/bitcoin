@@ -13,7 +13,7 @@ import bartoszzychal.BlockChainAnalyze.model.TransactionConnection;
 
 public abstract class AbstractRunner {
 
-	protected void writeToFile(List<TransactionConnection> tc, int connectionLimit, int sample, int transactionNumber,
+	protected void writeToFile(List<TransactionConnection> tc, long connectionLimit, int sample, int transactionNumber,
 			Sha256Hash startTransactionHash) {
 		try {
 			final String baseDirctory = "D:\\PWR\\mgr\\Praca Magisterska\\R";
