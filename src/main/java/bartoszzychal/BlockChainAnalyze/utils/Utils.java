@@ -2,6 +2,7 @@ package bartoszzychal.BlockChainAnalyze.utils;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.TimeZone;
 import java.util.function.Predicate;
 
@@ -19,7 +20,7 @@ public class Utils {
 	}
 	
 	public static LocalDateTime parse(long time) {
-		return LocalDateTime.ofInstant(Instant.ofEpochMilli(time), 
-                TimeZone.getDefault().toZoneId());  
+		return LocalDateTime.ofInstant(Instant.ofEpochSecond(time), 
+                TimeZone.getTimeZone("GMT").toZoneId());  
 	}
 }

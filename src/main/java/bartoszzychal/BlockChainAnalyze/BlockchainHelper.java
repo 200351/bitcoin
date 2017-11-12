@@ -27,7 +27,7 @@ public class BlockchainHelper {
 	public static Blockchain recreateBlockchain(List<Block> blocksInput, boolean reverse, boolean saveOrphandedBlocks) {
 		final Blockchain blockchain = Blockchain.getInstance();
 		if (CollectionUtils.isNotEmpty(blocksInput)) {
-			log.info("Start : recreateBlockchain with: " + blocksInput.size() + " blocks.");
+			log.info("Start recreating Blockchain with " + blocksInput.size() + " blocks.");
 			final LinkedHashMap<Sha256Hash, Block> blocksMap = new LinkedHashMap<>();
 			final LinkedHashMap<Sha256Hash, Block> prevBlocksMap = new LinkedHashMap<>();
 			for (Block block : blocksInput) {
@@ -123,7 +123,7 @@ public class BlockchainHelper {
 				remainingBlocks.stream().forEach(b -> blockchain.addOrphanedBlock(b));
 			}
 			// Removed used Orphaned Blocks
-			log.info("End : recreateBlockchain with: " + blocks.size() + " blocks.");
+			log.info("End recreating Blockchain with " + blocks.size() + " blocks.");
 		}
 		return blockchain;
 	}

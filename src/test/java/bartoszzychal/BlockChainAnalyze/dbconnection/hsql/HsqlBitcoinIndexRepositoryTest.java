@@ -62,4 +62,12 @@ public class HsqlBitcoinIndexRepositoryTest {
 		System.out.println(readIndex);
 	}
 
+	@Test
+	public void testReadBlock() {
+		final IBitCoinIndexRepository repository = new HsqlBitcoinIndexRepository();
+		final BlockIndex readIndex = repository.readIndex("0000000001151b8e29b49b3821bb12ccfedf2f9dad77d3793e112852c1d6d260");
+		assertNotNull(readIndex);
+		System.out.println(readIndex);
+	}
+
 }

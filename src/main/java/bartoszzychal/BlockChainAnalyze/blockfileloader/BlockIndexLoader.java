@@ -13,9 +13,12 @@ import org.bitcoinj.core.Context;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.ProtocolException;
 import org.bitcoinj.core.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.io.CountingInputStream;
 
+import bartoszzychal.BlockChainAnalyze.index.IndexCreator;
 import bartoszzychal.BlockChainAnalyze.persistance.BlockIndex;
 
 public class BlockIndexLoader implements Iterable<BlockIndex>, Iterator<BlockIndex> {
@@ -27,6 +30,7 @@ public class BlockIndexLoader implements Iterable<BlockIndex>, Iterator<BlockInd
     private NetworkParameters params;
     private File file;
 	private Context context;
+	private static final Logger log = LoggerFactory.getLogger(BlockIndexLoader.class);
 
     public BlockIndexLoader(NetworkParameters params, List<File> files) {
         fileIt = files.iterator();
@@ -53,7 +57,7 @@ public class BlockIndexLoader implements Iterable<BlockIndex>, Iterator<BlockInd
     private void loadNextBlock() {
         while (true) {
             try {
-                if (!fileIt.hasNext() && (currentFileStream == null || currentFileStream.available() < 1))
+                if (!fileIt.hasNext() && (countingInputStream == null || countingInputStream.available() < 1))
                     break;
             } catch (IOException e) {
                 currentFileStream = null;
@@ -64,7 +68,7 @@ public class BlockIndexLoader implements Iterable<BlockIndex>, Iterator<BlockInd
             }
             while (true) {
                 try {
-                    if (currentFileStream != null && currentFileStream.available() > 0)
+                    if (countingInputStream != null && countingInputStream.available() > 0)
                         break;
                 } catch (IOException e1) {
                     currentFileStream = null;
@@ -81,6 +85,7 @@ public class BlockIndexLoader implements Iterable<BlockIndex>, Iterator<BlockInd
                 try {
                     File file = fileIt.next();
                     this.file = file;
+                    log.info("Read file " + file.getName());
 					currentFileStream = new FileInputStream(file);
                     countingInputStream = new CountingInputStream(currentFileStream);
                 } catch (FileNotFoundException e) {
@@ -107,6 +112,7 @@ public class BlockIndexLoader implements Iterable<BlockIndex>, Iterator<BlockInd
                         break;
                 }
                 byte[] bytes = new byte[4];
+                final Long count = countingInputStream.getCount();
                 countingInputStream.read(bytes, 0, 4);
                 long size = Utils.readUint32BE(Utils.reverseBytes(bytes), 0);
                 // We allow larger than MAX_BLOCK_SIZE because test code uses this as well.
@@ -120,7 +126,7 @@ public class BlockIndexLoader implements Iterable<BlockIndex>, Iterator<BlockInd
                     blockIndex.setBlockHash(block.getHashAsString());
                     blockIndex.setGeneratedDate(bartoszzychal.BlockChainAnalyze.utils.Utils.parse(block.getTimeSeconds()));
                     blockIndex.setFileName(file.getName());
-                    blockIndex.setStartFromByte(countingInputStream.getCount());
+                    blockIndex.setStartFromByte(count);
                     nextBlockIndex = blockIndex;
                 } catch (ProtocolException e) {
                 	nextBlockIndex = null;

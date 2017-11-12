@@ -1,7 +1,6 @@
 package bartoszzychal.BlockChainAnalyze.dbconnection;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
 
 import bartoszzychal.BlockChainAnalyze.dbconnection.impl.EntityManagerProvider;
 
@@ -23,4 +22,7 @@ public interface IRepository {
 		return EntityManagerProvider.getEntityManager();
 	}
 	
+	default void closeConnection() {
+		EntityManagerProvider.closeConnection();
+	}
 }

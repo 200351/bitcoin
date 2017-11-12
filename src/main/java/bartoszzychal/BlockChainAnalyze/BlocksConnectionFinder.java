@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import bartoszzychal.BlockChainAnalyze.blockchainreader.IBlockChainReader;
-import bartoszzychal.BlockChainAnalyze.blockchainreader.impl.BlockChainReverseReader;
 import bartoszzychal.BlockChainAnalyze.generator.TransactionSearchInfoGenerator;
 import bartoszzychal.BlockChainAnalyze.model.TransactionConnection;
 import bartoszzychal.BlockChainAnalyze.model.TransactionConnectionInput;
@@ -27,9 +26,6 @@ import bartoszzychal.BlockChainAnalyze.model.TransactionSearchInfo;
 public class BlocksConnectionFinder {
 
     private static final Logger log = LoggerFactory.getLogger(BlocksConnectionFinder.class);
-
-	private long counter = 0;
-	private boolean startBlockHashFound = false;
 
 	public BlocksConnectionFinder() {
 
@@ -58,10 +54,13 @@ public class BlocksConnectionFinder {
 		
 		final Set<TransactionSearchInfo> connectionsToFind = new HashSet<>();
 		final Set<TransactionConnection> foundConnection = new HashSet<>();
+		long counter = 0;
+		boolean startBlockHashFound = false;
+		
 		while (counter < limit) {
-			final List<Block> blocks = blockchainReader.readBlockChainFromTo(to.minusDays(1), to);
+			final List<Block> blocks = blockchainReader.readBlockChainFromTo(to, to);
 			for (Block block : blocks) {
-				if (counter > limit) break;
+				if (counter >= limit) break;
 				// Find the start block.
 				if (!startBlockHashFound) {
 					if (block.getHash().equals(startBlockHash)) {
@@ -103,9 +102,9 @@ public class BlocksConnectionFinder {
 				// List new connections to find. List will be added to
 				// connections to find in next Block.
 				for (TransactionSearchInfo connectionInfo : connectionsToFind) {
-					if (counter > limit) break;
+					if (counter >= limit) break;
 					for (Transaction transaction : transactions) {
-						if (counter > limit) break;
+						if (counter >= limit) break;
 						// Check if at least one input transaction is connected
 						// to output the transaction from this block.
 						TransactionConnection tc = TransactionChecker.areTransactionsConnected(connectionInfo, transaction, block);

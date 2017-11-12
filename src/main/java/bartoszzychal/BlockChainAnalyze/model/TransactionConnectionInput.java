@@ -57,4 +57,10 @@ public class TransactionConnectionInput {
 		return startDate;
 	}
 
+	@Override
+	public String toString() {
+		return "TransactionConnectionInput [startDate=" + startDate + ", startBlockHash=" + startBlockHash
+				+ ", startTransactionHash=" + startTransactionHash + ", connectionsLimit=" + connectionsLimit + "]";
+	}
+
 }

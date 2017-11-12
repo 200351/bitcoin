@@ -1,21 +1,20 @@
 package bartoszzychal.BlockChainAnalyze;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
-import org.apache.commons.collections4.bag.SynchronizedSortedBag;
 import org.apache.commons.io.IOUtils;
 import org.bitcoinj.core.Sha256Hash;
 import org.junit.Test;
 
-import com.google.common.io.Files;
-
+import bartoszzychal.BlockChainAnalyze.blockchainreader.IBlockChainReader;
+import bartoszzychal.BlockChainAnalyze.blockchainreader.impl.BlockChainIndexDatabaseReader;
+import bartoszzychal.BlockChainAnalyze.dbconnection.IBitCoinIndexRepository;
+import bartoszzychal.BlockChainAnalyze.dbconnection.hsql.HsqlBitcoinIndexRepository;
 import bartoszzychal.BlockChainAnalyze.fileloader.FileLoader;
 import bartoszzychal.BlockChainAnalyze.model.TransactionConnection;
 import bartoszzychal.BlockChainAnalyze.model.TransactionConnectionInput;
@@ -48,17 +47,19 @@ public class BlocksConnectionFinderTest {
 
 	@Test
 	public void testFindConnections3() {
-		FileLoader.setDir("D:/PWR/mgr/Praca Magisterska/BitCoinCore/BitcoinCoreInstall/blocks_t/1/");
+		FileLoader.setDir("D:/PWR/mgr/Praca Magisterska/BitCoinCore/BitcoinCoreInstall/blocks/");
 		final BlocksConnectionFinder blocksConnectionFinder = new BlocksConnectionFinder();
-		int connectionsLimit = 1000000;
+		int connectionsLimit = 100000;
 		TransactionConnectionInput transactionConnectionInput = new TransactionConnectionInput(
 				LocalDate.of(2015, 10, 10),
 				Sha256Hash.wrap("000000000000000004a89bd78bbaa336afb8ca11ef1e06af4f4617783a9dce12"),
 				Sha256Hash.wrap("82e8621ba492cdd8101a78f7ecb886bb37cb5d577e4022db91cc9a6f81b9c5c6"), 
 				connectionsLimit);
 
+		final IBitCoinIndexRepository repository = new HsqlBitcoinIndexRepository();
+		final IBlockChainReader blockchainReader = new BlockChainIndexDatabaseReader(repository);
 		final TransactionConnectionOutput findConnections = blocksConnectionFinder
-				.findConnections(transactionConnectionInput, null);
+				.findConnections(transactionConnectionInput, blockchainReader);
 		
 		List<TransactionConnection> connections = findConnections.getConnections();
 		System.out.println("Founded " + connections.size() + " Connections");

@@ -13,16 +13,23 @@ import bartoszzychal.BlockChainAnalyze.model.TransactionConnection;
 
 public abstract class AbstractRunner {
 
-	protected void writeToFile(List<TransactionConnection> tc, int connectionLimit, int sample,
+	protected void writeToFile(List<TransactionConnection> tc, int connectionLimit, int sample, int transactionNumber,
 			Sha256Hash startTransactionHash) {
 		try {
-			createIfNotExists("D:\\PWR\\mgr\\Praca Magisterska\\R");
-			String sampleDirectoryPath = "D:\\PWR\\mgr\\Praca Magisterska\\R\\Sample" + sample;
-			createIfNotExists(sampleDirectoryPath);
+			final String baseDirctory = "D:\\PWR\\mgr\\Praca Magisterska\\R";
+			createIfNotExists(baseDirctory);
+			final String connectionsDirectory = baseDirctory + "\\" + connectionLimit;
+			createIfNotExists(connectionsDirectory);
+			final String sampleDirectory = connectionsDirectory + "\\Sample_" + sample;
+			createIfNotExists(sampleDirectory);
+			final String coinsDirectory = sampleDirectory + "\\coins";
+			createIfNotExists(coinsDirectory);
+			final String timeDirectory = sampleDirectory + "\\time";
+			createIfNotExists(timeDirectory);
 			final File coinsFile = new File(
-					sampleDirectoryPath + "\\coins" + sample + "_" + startTransactionHash.toString() + ".csv");
+					coinsDirectory+ "\\" + sample + "_" + transactionNumber + "_" + startTransactionHash.toString() + ".csv");
 			final File timeFile = new File(
-					sampleDirectoryPath + "\\time" + sample + "_" + startTransactionHash.toString() + ".csv");
+					timeDirectory + "\\" + sample + "_" + transactionNumber + "_" + startTransactionHash.toString() + ".csv");
 			final OutputStream coinsOS = new FileOutputStream(coinsFile);
 			final OutputStream timeOS = new FileOutputStream(timeFile);
 			for (TransactionConnection transactionConnection : tc) {

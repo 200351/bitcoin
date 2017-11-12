@@ -47,7 +47,17 @@ public class InfoMapper {
 	}
 
 	public static OutputInfo map(TransactionOutput t) {
-		final Address address = t.getAddressFromP2PKHScript(MainNetParams.get());
+		Address address = null;
+		try {
+			address = t.getAddressFromP2PKHScript(MainNetParams.get());
+		} catch (Exception e) {
+			try {
+				address = t.getAddressFromP2SH(MainNetParams.get());
+			} catch (Exception e2) {
+				address = null;
+			}
+
+		}
 		return address != null ? new OutputInfo(t.getValue(), address.toString()) : null;
 	}
 	

@@ -7,7 +7,7 @@ import javax.persistence.Persistence;
 public class EntityManagerProvider {
 
 	private static EntityManager entityManager;
-	private static EntityManagerFactory emfactory;
+	private static EntityManagerFactory factory;
 	
 	private EntityManagerProvider() {
 	}
@@ -15,12 +15,16 @@ public class EntityManagerProvider {
 	public static synchronized EntityManager getEntityManager() {
 		if (entityManager == null) {
 			EntityManagerFactory emfactory = Persistence.createEntityManagerFactory( "BlockchainIndex" );
-			entityManager = emfactory.createEntityManager( );
+			factory = emfactory;
+			entityManager = emfactory.createEntityManager();
 		}
 		return entityManager;
 	}
 	
 	public static synchronized void closeConnection() {
-		if (emfactory.isOpen()) emfactory.close();
+		if (factory.isOpen()) {
+			factory.close();
+			entityManager = null;
+		}
 	}
 }

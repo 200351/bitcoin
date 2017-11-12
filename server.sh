@@ -1,1 +1,8 @@
-java -cp "C:\Users\Bartosz\.m2\repository\org\hsqldb\hsqldb\2.4.0\hsqldb-2.4.0.jar" org.hsqldb.server.Server --database.0 file:"D:\PWR\mgr\Praca Magisterska\Workspace\blockchainanalyze\data" -dbname.0 db
+var_pwd=$(pwd)
+var_db_file="$(pwd)/database/data"
+var_user=$(whoami)
+var_hsql="C:/Users/$var_user/.m2/repository/org/hsqldb/hsqldb/2.4.0/hsqldb-2.4.0.jar"
+echo "The current working directory $var_db_file"
+echo "The current Hsql jar $var_hsql"
+
+java -cp $var_hsql org.hsqldb.server.Server --database.0 file:$var_db_file -dbname.0 blockchainIndex

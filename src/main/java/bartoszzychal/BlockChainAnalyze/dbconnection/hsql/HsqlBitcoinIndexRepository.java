@@ -27,7 +27,7 @@ public class HsqlBitcoinIndexRepository implements IBitCoinIndexRepository {
 	private static final Logger log = LoggerFactory.getLogger(HsqlBitcoinIndexRepository.class);
 
 	@Override
-	public BlockIndex readIndex(String blockHash) {
+	public synchronized BlockIndex readIndex(String blockHash) {
 		BlockIndex blockIndex = null;
 		if (StringUtils.isNotBlank(blockHash)) {
 			final Query query = getEntityManager()
@@ -45,12 +45,11 @@ public class HsqlBitcoinIndexRepository implements IBitCoinIndexRepository {
 	}
 
 	@Override
-	public List<BlockIndex> readIndexedBlocks(LocalDate start, LocalDate end) {
+	public synchronized List<BlockIndex> readIndexedBlocks(LocalDate start, LocalDate end) {
 		List<BlockIndex> blockIndexes = null;
 		if (start != null && end != null) {
 			LocalDateTime startDate = LocalDateTime.of(start, LocalTime.MIN);
 			LocalDateTime endDate = LocalDateTime.of(end, LocalTime.MAX);
-			openTransaction();
 			final Query query = getEntityManager()
 					.createQuery("select bi from BlockIndex bi"
 							+ " where bi.generatedDate >= :" + BLOCK_START_PARAM
@@ -59,6 +58,7 @@ public class HsqlBitcoinIndexRepository implements IBitCoinIndexRepository {
 			query.setParameter(BLOCK_END_PARAM, endDate);
 			final List<BlockIndex> resultList = query.getResultList();
 			
+			openTransaction();
 			if (CollectionUtils.isNotEmpty(resultList)) {
 				blockIndexes = resultList;
 			}
@@ -77,8 +77,11 @@ public class HsqlBitcoinIndexRepository implements IBitCoinIndexRepository {
 				newBlockIndex.setBlockHash(hashAsString);
 				newBlockIndex.setFileName(fileName);
 				newBlockIndex.setStartFromByte(startFromByte);
-				newBlockIndex.setGeneratedDate(parse(block.getTimeSeconds()));
+				final LocalDateTime parse = parse(block.getTimeSeconds());
+				newBlockIndex.setGeneratedDate(parse);
+				openTransaction();
 				getEntityManager().persist(newBlockIndex);
+				closeTransaction();
 				blockIndex = newBlockIndex;
 			}
 		}
@@ -91,7 +94,7 @@ public class HsqlBitcoinIndexRepository implements IBitCoinIndexRepository {
 	}
 
 	@Override
-	public BlockIndex createNewIndexForBlock(BlockIndex blockIndex) {
+	public BlockIndex createNewIndexForBlock(BlockIndex blockIndex, boolean reindex) {
 		if (blockIndex == null) {
 			log.warn("Block Index == null. Skip");
 		}
@@ -108,11 +111,33 @@ public class HsqlBitcoinIndexRepository implements IBitCoinIndexRepository {
 			log.warn("Generated Date Index == null. Skip " + blockIndex.getBlockHash());
 		}
 		
-		if (readIndex(blockIndex.getBlockHash()) == null) {
-			getEntityManager().persist(blockIndex);
+		
+		BlockIndex oldReadIndex = null;
+
+		if (reindex && (oldReadIndex = readIndex(blockIndex.getBlockHash())) != null) {
+			removeIndex(oldReadIndex);
+			oldReadIndex = null;
+		}
+		
+		if (oldReadIndex == null) {
+			createIndex(blockIndex);
 		}
 		
 		return blockIndex;
+	}
+
+	@Override
+	public void removeIndex(BlockIndex index) {
+		openTransaction();
+		getEntityManager().remove(index);
+		closeTransaction();
+	}
+	
+	@Override
+	public void createIndex(BlockIndex index) {
+		openTransaction();
+		getEntityManager().persist(index);
+		closeTransaction();
 	}
 }
 	
