@@ -9,13 +9,13 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import org.apache.log4j.Logger;
 
 public class FileLoader {
 	
-	private static String dir = "D:/PWR/mgr/Praca Magisterska/BitCoinCore/BitcoinCoreInstall/blocks/";
-	private static final Logger log = LoggerFactory.getLogger(FileLoader.class);
+	private static String dir = "D:/PWR/mgr/PracaMagisterska/BitCoinCore/BitcoinCoreInstall/blocks/";
+	private static final Logger log = Logger.getLogger(FileLoader.class);
 
 	public static List<File> readFiles() {
 		final List<File> files = new ArrayList<>();

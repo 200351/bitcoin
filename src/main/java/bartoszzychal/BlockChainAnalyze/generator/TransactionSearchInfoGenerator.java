@@ -6,15 +6,15 @@ import java.util.stream.Collectors;
 import org.bitcoinj.core.Block;
 import org.bitcoinj.core.Transaction;
 import org.bitcoinj.core.TransactionInput;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import org.apache.log4j.Logger;
 
 import bartoszzychal.BlockChainAnalyze.mapper.InfoMapper;
 import bartoszzychal.BlockChainAnalyze.model.TransactionSearchInfo;
 import bartoszzychal.BlockChainAnalyze.utils.Utils;
 
 public class TransactionSearchInfoGenerator {
-	private static final Logger log = LoggerFactory.getLogger(TransactionSearchInfoGenerator.class);
+	private static final Logger log = Logger.getLogger(TransactionSearchInfoGenerator.class);
 
 	public static TransactionSearchInfo generate(Transaction transaction, Block block) {
 		TransactionSearchInfo searchInfo = new TransactionSearchInfo();

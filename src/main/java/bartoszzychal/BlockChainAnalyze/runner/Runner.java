@@ -1,29 +1,27 @@
 package bartoszzychal.BlockChainAnalyze.runner;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.log4j.Logger;
 import org.bitcoinj.core.Block;
 import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.core.Transaction;
 import org.bitcoinj.params.MainNetParams;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import bartoszzychal.BlockChainAnalyze.BlocksConnectionFinder;
 import bartoszzychal.BlockChainAnalyze.blockchainreader.impl.BlockChainIndexDatabaseReader;
 import bartoszzychal.BlockChainAnalyze.blockfileloader.BlockLoader;
 import bartoszzychal.BlockChainAnalyze.dbconnection.IBitCoinIndexRepository;
 import bartoszzychal.BlockChainAnalyze.dbconnection.hsql.HsqlBitcoinIndexRepository;
 import bartoszzychal.BlockChainAnalyze.fileloader.FileLoader;
+import bartoszzychal.BlockChainAnalyze.finder.BlocksConnectionFinder;
+import bartoszzychal.BlockChainAnalyze.index.persistance.BlockIndex;
 import bartoszzychal.BlockChainAnalyze.model.TransactionConnectionInput;
 import bartoszzychal.BlockChainAnalyze.model.TransactionConnectionOutput;
-import bartoszzychal.BlockChainAnalyze.persistance.BlockIndex;
 import bartoszzychal.BlockChainAnalyze.utils.Utils;
 
 public class Runner extends AbstractRunner {
-	private static final Logger log = LoggerFactory.getLogger(Runner.class);
+	private static final Logger log = Logger.getLogger(Runner.class);
 
 	private Sha256Hash[] startBlockHash = {
 			Sha256Hash.wrap("00000000000000000033b23b4895616a1be85c364ed06b0aa6591ceee4f87328"), //2017-06-30
@@ -37,14 +35,16 @@ public class Runner extends AbstractRunner {
 			Sha256Hash.wrap("0000000000000000136329764b75ae34a79d2bafeab4cd2c60c077ce5c7aec25"), //2015-06-30
 			Sha256Hash.wrap("00000000000000000bca1b1e8c5fdad63b1c23dd7bb7e0bb37bbcf8039210fc3") //2015-03-31
 	};
+	
+	
 
 	public static void main(String[] args) {
-		Long connectionsLimit = Long.valueOf(100000);
+		Long connectionsLimit = Long.valueOf(100);
 		final Runner runner = new Runner();
-		runner.run(connectionsLimit, null);
+		runner.run(connectionsLimit, 2);
 	}
 
-	private void run(Long connectionsLimit, Integer sample) {
+	private void run(Long connectionsLimit, Integer sampleStart) {
 		FileLoader.setDir("D:/PWR/mgr/Praca Magisterska/BitCoinCore/BitcoinCoreInstall/blocks/");
 		final IBitCoinIndexRepository repository = new HsqlBitcoinIndexRepository();
 		final BlockLoader blockLoader = new BlockLoader(MainNetParams.get(), FileLoader.readFiles());
@@ -53,8 +53,8 @@ public class Runner extends AbstractRunner {
 		int startHash = 0;
 		int range = startBlockHash.length;
 		
-		if (sample != null) {
-			startHash = sample.intValue();
+		if (sampleStart != null) {
+			startHash = sampleStart.intValue();
 			range = startHash + 1;
 		}
 		
@@ -91,7 +91,15 @@ public class Runner extends AbstractRunner {
 					final TransactionConnectionOutput tc = blocksConnectionFinder
 							.findConnections(transactionConnectionInput, blockchainReader);
 					// write result to filke
-					writeToFile(tc.getConnections(), connectionsLimit.longValue(), blockNumber, transactionNumber, transactionHash);
+					if (tc.getConnectionsFoundSuccess()) {
+						writeToFile(tc.getConnections(), connectionsLimit.longValue(), blockNumber, transactionNumber, transactionHash);
+					} else {
+						log.warn("TransactionInput probably create from CoinBase. Transaction " + transactionHash + " skip.");
+						skip++;
+						if (transactions.size() >= skip + 11) {
+							break;
+						}
+					}
 				}
 			}
 

@@ -4,11 +4,11 @@ import java.time.LocalDate;
 
 import org.bitcoinj.core.Sha256Hash;
 
-import bartoszzychal.BlockChainAnalyze.BlocksConnectionFinder;
 import bartoszzychal.BlockChainAnalyze.blockchainreader.impl.BlockChainIndexDatabaseReader;
 import bartoszzychal.BlockChainAnalyze.dbconnection.IBitCoinIndexRepository;
 import bartoszzychal.BlockChainAnalyze.dbconnection.hsql.HsqlBitcoinIndexRepository;
 import bartoszzychal.BlockChainAnalyze.fileloader.FileLoader;
+import bartoszzychal.BlockChainAnalyze.finder.BlocksConnectionFinder;
 import bartoszzychal.BlockChainAnalyze.model.TransactionConnectionInput;
 import bartoszzychal.BlockChainAnalyze.model.TransactionConnectionOutput;
 

@@ -11,7 +11,7 @@ import org.junit.Test;
 import bartoszzychal.BlockChainAnalyze.dbconnection.IBitCoinIndexRepository;
 import bartoszzychal.BlockChainAnalyze.dbconnection.hsql.HsqlBitcoinIndexRepository;
 import bartoszzychal.BlockChainAnalyze.fileloader.FileLoader;
-import bartoszzychal.BlockChainAnalyze.persistance.BlockIndex;
+import bartoszzychal.BlockChainAnalyze.index.persistance.BlockIndex;
 
 public class BlockLoaderTest {
 

@@ -1,4 +1,4 @@
-package bartoszzychal.BlockChainAnalyze;
+package bartoszzychal.BlockChainAnalyze.blockchain;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,15 +14,15 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.bitcoinj.core.Block;
 import org.bitcoinj.core.Sha256Hash;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import org.apache.log4j.Logger;
 
 import bartoszzychal.BlockChainAnalyze.model.Blockchain;
 import bartoszzychal.BlockChainAnalyze.model.BlockchainRang;
 
 public class BlockchainHelper {
 	
-    private static final Logger log = LoggerFactory.getLogger(BlockchainHelper.class);
+    private static final Logger log = Logger.getLogger(BlockchainHelper.class);
 
 	public static Blockchain recreateBlockchain(List<Block> blocksInput, boolean reverse, boolean saveOrphandedBlocks) {
 		final Blockchain blockchain = Blockchain.getInstance();

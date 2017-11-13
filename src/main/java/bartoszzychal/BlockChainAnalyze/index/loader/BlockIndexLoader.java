@@ -1,4 +1,4 @@
-package bartoszzychal.BlockChainAnalyze.blockfileloader;
+package bartoszzychal.BlockChainAnalyze.index.loader;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,13 +13,14 @@ import org.bitcoinj.core.Context;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.ProtocolException;
 import org.bitcoinj.core.Utils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import org.apache.log4j.Logger;
 
 import com.google.common.io.CountingInputStream;
 
 import bartoszzychal.BlockChainAnalyze.index.IndexCreator;
-import bartoszzychal.BlockChainAnalyze.persistance.BlockIndex;
+import bartoszzychal.BlockChainAnalyze.index.mapper.PersistanceMapper;
+import bartoszzychal.BlockChainAnalyze.index.persistance.BlockIndex;
 
 public class BlockIndexLoader implements Iterable<BlockIndex>, Iterator<BlockIndex> {
    
@@ -30,7 +31,7 @@ public class BlockIndexLoader implements Iterable<BlockIndex>, Iterator<BlockInd
     private NetworkParameters params;
     private File file;
 	private Context context;
-	private static final Logger log = LoggerFactory.getLogger(BlockIndexLoader.class);
+	private static final Logger log = Logger.getLogger(BlockIndexLoader.class);
 
     public BlockIndexLoader(NetworkParameters params, List<File> files) {
         fileIt = files.iterator();
@@ -122,9 +123,8 @@ public class BlockIndexLoader implements Iterable<BlockIndex>, Iterator<BlockInd
                 countingInputStream.read(bytes, 0, (int) size);
                 try {
                     final Block block = params.getDefaultSerializer().makeBlock(bytes);
-                    final BlockIndex blockIndex = new BlockIndex();
+                    final BlockIndex blockIndex = PersistanceMapper.map(block);
                     blockIndex.setBlockHash(block.getHashAsString());
-                    blockIndex.setGeneratedDate(bartoszzychal.BlockChainAnalyze.utils.Utils.parse(block.getTimeSeconds()));
                     blockIndex.setFileName(file.getName());
                     blockIndex.setStartFromByte(count);
                     nextBlockIndex = blockIndex;

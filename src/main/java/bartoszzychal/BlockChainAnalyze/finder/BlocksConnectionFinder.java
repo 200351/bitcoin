@@ -1,4 +1,4 @@
-package bartoszzychal.BlockChainAnalyze;
+package bartoszzychal.BlockChainAnalyze.finder;
 
 import java.text.DecimalFormat;
 import java.time.Duration;
@@ -14,8 +14,8 @@ import java.util.stream.Collectors;
 import org.bitcoinj.core.Block;
 import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.core.Transaction;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import org.apache.log4j.Logger;
 
 import bartoszzychal.BlockChainAnalyze.blockchainreader.IBlockChainReader;
 import bartoszzychal.BlockChainAnalyze.generator.TransactionSearchInfoGenerator;
@@ -26,7 +26,7 @@ import bartoszzychal.BlockChainAnalyze.model.TransactionSearchInfo;
 
 public class BlocksConnectionFinder {
 
-    private static final Logger log = LoggerFactory.getLogger(BlocksConnectionFinder.class);
+    private static final Logger log = Logger.getLogger(BlocksConnectionFinder.class);
 
 	public BlocksConnectionFinder() {
 
@@ -57,10 +57,13 @@ public class BlocksConnectionFinder {
 		final Set<TransactionConnection> foundConnection = new HashSet<>();
 		long counter = 0;
 		boolean startBlockHashFound = false;
-		
+		int usedBlocksCount = 0;
 		while (counter < limit) {
 			List<Block> blocks;
+			if (counter >= limit) break;
 			while((blocks = blockchainReader.readBlockChainFromTo(to, to)) != null) {
+				usedBlocksCount += blocks.size();
+				if (counter >= limit) break;
 				for (Block block : blocks) {
 					if (counter >= limit) break;
 					// Find the start block.
@@ -126,11 +129,11 @@ public class BlocksConnectionFinder {
 							}
 						}
 						checkedTransactionsConnectionCounter++;
-						double progress = (double) ((double)checkedTransactionsConnectionCounter / (double)connectionsToFind.size() * 100);
-					    DecimalFormat df = new DecimalFormat();
-					    df.setMaximumFractionDigits(4);
-					    df.setMinimumFractionDigits(4);
-						log.info("Checked [" +df.format(progress) + "%] Transaction Connections.");
+//						double progress = (double) ((double)checkedTransactionsConnectionCounter / (double)connectionsToFind.size() * 100);
+//					    DecimalFormat df = new DecimalFormat();
+//					    df.setMaximumFractionDigits(4);
+//					    df.setMinimumFractionDigits(4);
+//						log.info("Checked [" +df.format(progress) + "%] Transaction Connections.");
 					}
 					log.info("In Block " + block.getHashAsString());
 					log.info("Count of all found connections in block: " + foundConnection.size());
@@ -143,6 +146,11 @@ public class BlocksConnectionFinder {
 					final LocalDateTime logTime = LocalDateTime.now();
 					final Duration duration = Duration.between(startTime, logTime);
 					log.info("Work time: " + duration.get(ChronoUnit.SECONDS));
+				}
+				log.info("Used blocks: " + usedBlocksCount);
+				if ((usedBlocksCount > limit * 0.1) && (foundConnection.size() < limit * 0.01)) {
+					transactionConnectionOutput = new TransactionConnectionOutput(Boolean.FALSE);
+					return transactionConnectionOutput;
 				}
 			}
 			to = to.minusDays(1);

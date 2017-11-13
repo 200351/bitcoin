@@ -14,7 +14,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import bartoszzychal.BlockChainAnalyze.dbconnection.IBitCoinIndexRepository;
-import bartoszzychal.BlockChainAnalyze.persistance.BlockIndex;
+import bartoszzychal.BlockChainAnalyze.dbconnection.impl.EntityManagerProvider;
+import bartoszzychal.BlockChainAnalyze.index.persistance.BlockIndex;
 
 public class HsqlBitcoinIndexRepositoryTest {
 
@@ -60,6 +61,7 @@ public class HsqlBitcoinIndexRepositoryTest {
 		final BlockIndex readIndex = repository.readIndex(hashAsString);
 		assertNotNull(readIndex);
 		System.out.println(readIndex);
+		EntityManagerProvider.closeConnection();
 	}
 
 	@Test

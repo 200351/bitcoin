@@ -7,18 +7,18 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bitcoinj.params.MainNetParams;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import bartoszzychal.BlockChainAnalyze.blockfileloader.BlockIndexLoader;
+import org.apache.log4j.Logger;
+
 import bartoszzychal.BlockChainAnalyze.dbconnection.IBitCoinIndexRepository;
 import bartoszzychal.BlockChainAnalyze.dbconnection.hsql.HsqlBitcoinIndexRepository;
 import bartoszzychal.BlockChainAnalyze.dbconnection.impl.EntityManagerProvider;
 import bartoszzychal.BlockChainAnalyze.fileloader.FileLoader;
-import bartoszzychal.BlockChainAnalyze.persistance.BlockIndex;
+import bartoszzychal.BlockChainAnalyze.index.loader.BlockIndexLoader;
+import bartoszzychal.BlockChainAnalyze.index.persistance.BlockIndex;
 
 public class IndexCreator {
-	private static final Logger log = LoggerFactory.getLogger(IndexCreator.class);
+	private static final Logger log = Logger.getLogger(IndexCreator.class);
 
 	private IBitCoinIndexRepository repository;
 
@@ -57,11 +57,28 @@ public class IndexCreator {
 	}
 
 	public static void main(String[] args) {
-		FileLoader.setDir("D:/PWR/mgr/Praca Magisterska/BitCoinCore/BitcoinCoreInstall/blocks/");
+		FileLoader.setDir("D:/PWR/mgr/PracaMagisterska/BitCoinCore/BitcoinCoreInstall/blocks/");
 		final IndexCreator indexCreator = new IndexCreator(new HsqlBitcoinIndexRepository());
-//		indexCreator.indexing(100, 250);
-//		indexCreator.indexing(250, 500);
-//		indexCreator.indexing(500, 750);
-		indexCreator.indexing(150, 975);
+//		indexCreator.indexing(0, 50);
+//		indexCreator.indexing(51, 100);
+//		indexCreator.indexing(101, 150);
+//		indexCreator.indexing(151, 200);
+//		indexCreator.indexing(201, 250);
+//		indexCreator.indexing(251, 300);
+//		indexCreator.indexing(301, 350);
+//		indexCreator.indexing(351, 400);
+//		indexCreator.indexing(401, 450);
+//		indexCreator.indexing(451, 500);
+//		indexCreator.indexing(501, 550);
+//		indexCreator.indexing(551, 600);
+//		indexCreator.indexing(601, 650);
+//		indexCreator.indexing(651, 700);
+//		indexCreator.indexing(701, 750);
+//		indexCreator.indexing(751, 800);
+//		indexCreator.indexing(801, 850);
+//		indexCreator.indexing(851, 900);
+//		indexCreator.indexing(901, 950);
+//		indexCreator.indexing(951, 975);
+//
 	}
 }

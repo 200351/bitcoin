@@ -11,20 +11,19 @@ import javax.persistence.Query;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 import org.bitcoinj.core.Block;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import bartoszzychal.BlockChainAnalyze.dbconnection.IBitCoinIndexRepository;
-import bartoszzychal.BlockChainAnalyze.index.IndexCreator;
-import bartoszzychal.BlockChainAnalyze.persistance.BlockIndex;
+import bartoszzychal.BlockChainAnalyze.index.mapper.PersistanceMapper;
+import bartoszzychal.BlockChainAnalyze.index.persistance.BlockIndex;
 
 public class HsqlBitcoinIndexRepository implements IBitCoinIndexRepository {
 
 	private final String BLOCK_HASH_PARAM = "blockHashParam";
 	private final String BLOCK_START_PARAM = "blockStartParam";
 	private final String BLOCK_END_PARAM = "blockEndParam";
-	private static final Logger log = LoggerFactory.getLogger(HsqlBitcoinIndexRepository.class);
+	private static final Logger log = Logger.getLogger(HsqlBitcoinIndexRepository.class);
 
 	@Override
 	public synchronized BlockIndex readIndex(String blockHash) {
@@ -74,16 +73,12 @@ public class HsqlBitcoinIndexRepository implements IBitCoinIndexRepository {
 		if (block != null && StringUtils.isNotBlank(block.getHashAsString())) {
 			final String hashAsString = block.getHashAsString();
 			if (readIndex(hashAsString) == null) {
-				BlockIndex newBlockIndex = new BlockIndex();
-				newBlockIndex.setBlockHash(hashAsString);
-				newBlockIndex.setFileName(fileName);
-				newBlockIndex.setStartFromByte(startFromByte);
-				final LocalDateTime parse = parse(block.getTimeSeconds());
-				newBlockIndex.setGeneratedDate(parse);
+				blockIndex = PersistanceMapper.map(block);
+				blockIndex.setFileName(fileName);
+				blockIndex.setStartFromByte(startFromByte);
 				openTransaction();
-				getEntityManager().persist(newBlockIndex);
+				getEntityManager().persist(blockIndex);
 				closeTransaction();
-				blockIndex = newBlockIndex;
 			}
 		}
 		return blockIndex;

@@ -14,10 +14,10 @@ import org.bitcoinj.core.Block;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.ProtocolException;
 import org.bitcoinj.core.Utils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import bartoszzychal.BlockChainAnalyze.BlockchainHelper;
+import org.apache.log4j.Logger;
+
+import bartoszzychal.BlockChainAnalyze.blockchain.BlockchainHelper;
 import bartoszzychal.BlockChainAnalyze.blockchainreader.impl.BlockChainReverseReader;
 import bartoszzychal.BlockChainAnalyze.model.Blockchain;
 
@@ -43,7 +43,7 @@ public class BlockFileReverseLoader implements Iterable<Block>, Iterator<Block> 
     private FileInputStream currentFileStream = null;
     private Block nextBlock = null;
     private NetworkParameters params;
-	private static final Logger log = LoggerFactory.getLogger(BlockFileReverseLoader.class);
+	private static final Logger log = Logger.getLogger(BlockFileReverseLoader.class);
 
     public BlockFileReverseLoader(NetworkParameters params, List<File> files) {
         fileIt = files.stream().sorted(Collections.reverseOrder()).iterator();

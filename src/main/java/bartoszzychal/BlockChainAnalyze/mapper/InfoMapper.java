@@ -10,8 +10,8 @@ import org.bitcoinj.core.TransactionInput;
 import org.bitcoinj.core.TransactionOutput;
 import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.script.Script;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import org.apache.log4j.Logger;
 
 import bartoszzychal.BlockChainAnalyze.model.AbstractInfo;
 import bartoszzychal.BlockChainAnalyze.model.ConnectedInfo;
@@ -21,7 +21,7 @@ import bartoszzychal.BlockChainAnalyze.model.TransactionSearchInfo;
 
 public class InfoMapper {
 	
-	private static final Logger log = LoggerFactory.getLogger(InfoMapper.class);
+	private static final Logger log = Logger.getLogger(InfoMapper.class);
 	
 	public static Set<InputInfo> map(TransactionSearchInfo tc) {
 		if (tc != null && CollectionUtils.isNotEmpty(tc.getInfo())) {

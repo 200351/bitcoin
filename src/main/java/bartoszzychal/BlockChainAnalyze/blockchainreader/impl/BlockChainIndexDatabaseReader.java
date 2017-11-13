@@ -9,16 +9,16 @@ import org.bitcoinj.core.Block;
 import org.bitcoinj.core.Context;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.params.MainNetParams;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import bartoszzychal.BlockChainAnalyze.BlockchainHelper;
+import org.apache.log4j.Logger;
+
+import bartoszzychal.BlockChainAnalyze.blockchain.BlockchainHelper;
 import bartoszzychal.BlockChainAnalyze.blockchainreader.IBlockChainReader;
 import bartoszzychal.BlockChainAnalyze.blockfileloader.BlockLoader;
 import bartoszzychal.BlockChainAnalyze.dbconnection.IBitCoinIndexRepository;
 import bartoszzychal.BlockChainAnalyze.fileloader.FileLoader;
+import bartoszzychal.BlockChainAnalyze.index.persistance.BlockIndex;
 import bartoszzychal.BlockChainAnalyze.model.Blockchain;
-import bartoszzychal.BlockChainAnalyze.persistance.BlockIndex;
 
 public class BlockChainIndexDatabaseReader implements IBlockChainReader{
 
@@ -26,7 +26,7 @@ public class BlockChainIndexDatabaseReader implements IBlockChainReader{
 	final static NetworkParameters np = new MainNetParams();
 	final static Context context = new Context(np);
 	final BlockLoader blockLoader;
-	private static final Logger log = LoggerFactory.getLogger(BlockChainIndexDatabaseReader.class);
+	private static final Logger log = Logger.getLogger(BlockChainIndexDatabaseReader.class);
 	private Iterator<BlockIndex> indexIt = null;
 	private final int BLOCK_COUNT = 30;
 	

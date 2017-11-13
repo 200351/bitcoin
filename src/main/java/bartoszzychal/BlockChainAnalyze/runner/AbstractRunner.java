@@ -26,15 +26,21 @@ public abstract class AbstractRunner {
 			createIfNotExists(coinsDirectory);
 			final String timeDirectory = sampleDirectory + "\\time";
 			createIfNotExists(timeDirectory);
+			final String fullDirectory = sampleDirectory + "\\full";
+			createIfNotExists(fullDirectory);
 			final File coinsFile = new File(
 					coinsDirectory+ "\\" + sample + "_" + transactionNumber + "_" + startTransactionHash.toString() + ".csv");
 			final File timeFile = new File(
 					timeDirectory + "\\" + sample + "_" + transactionNumber + "_" + startTransactionHash.toString() + ".csv");
+			final File fullFile = new File(
+					fullDirectory + "\\" + sample + "_" + transactionNumber + "_" + startTransactionHash.toString() + ".csv");
 			final OutputStream coinsOS = new FileOutputStream(coinsFile);
 			final OutputStream timeOS = new FileOutputStream(timeFile);
+			final OutputStream fullOS = new FileOutputStream(fullFile);
 			for (TransactionConnection transactionConnection : tc) {
 				IOUtils.write(transactionConnection.toRCoinsString() + "\n", coinsOS);
 				IOUtils.write(transactionConnection.toRTimeString() + "\n", timeOS);
+				IOUtils.write(transactionConnection.toFullString() + "\n", fullOS);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

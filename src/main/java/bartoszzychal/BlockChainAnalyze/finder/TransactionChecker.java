@@ -1,4 +1,4 @@
-package bartoszzychal.BlockChainAnalyze;
+package bartoszzychal.BlockChainAnalyze.finder;
 
 import java.util.HashSet;
 import java.util.List;
@@ -10,8 +10,8 @@ import org.apache.commons.collections4.SetUtils;
 import org.bitcoinj.core.Block;
 import org.bitcoinj.core.Transaction;
 import org.bitcoinj.core.TransactionOutput;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import org.apache.log4j.Logger;
 
 import bartoszzychal.BlockChainAnalyze.mapper.InfoMapper;
 import bartoszzychal.BlockChainAnalyze.model.InputInfo;
@@ -21,7 +21,7 @@ import bartoszzychal.BlockChainAnalyze.model.TransactionSearchInfo;
 import bartoszzychal.BlockChainAnalyze.utils.Utils;
 
 public class TransactionChecker {
-	private static final Logger log = LoggerFactory.getLogger(BlocksConnectionFinder.class);
+	private static final Logger log = Logger.getLogger(BlocksConnectionFinder.class);
 
 	public static TransactionConnection areTransactionsConnected(final TransactionSearchInfo searchInfo,
 			final Transaction transaction, final Block block) {

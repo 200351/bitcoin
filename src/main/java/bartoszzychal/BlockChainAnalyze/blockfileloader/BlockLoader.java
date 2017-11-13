@@ -12,15 +12,15 @@ import org.bitcoinj.core.Block;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.ProtocolException;
 import org.bitcoinj.core.Utils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import bartoszzychal.BlockChainAnalyze.persistance.BlockIndex;
+import bartoszzychal.BlockChainAnalyze.index.persistance.BlockIndex;
+
+import org.apache.log4j.Logger;
 
 public class BlockLoader {
 
 	private NetworkParameters params;
-	private static final Logger log = LoggerFactory.getLogger(BlockLoader.class);
+	private static final Logger log = Logger.getLogger(BlockLoader.class);
 	private final Map<String, File> filesMap;
 
     public BlockLoader(NetworkParameters params, List<File> files) {

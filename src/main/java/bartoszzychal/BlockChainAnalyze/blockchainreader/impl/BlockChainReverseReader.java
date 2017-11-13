@@ -12,8 +12,8 @@ import org.bitcoinj.core.PrunedException;
 import org.bitcoinj.core.VerificationException;
 import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.store.BlockStoreException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import org.apache.log4j.Logger;
 
 import bartoszzychal.BlockChainAnalyze.blockchainreader.IBlockChainReader;
 import bartoszzychal.BlockChainAnalyze.blockfileloader.BlockFileReverseLoader;
@@ -26,7 +26,7 @@ public class BlockChainReverseReader extends AbstractBlockChainReader implements
 	private static IBlockChainReader blockChainReverseReader = null;
 	private static boolean isReturned = false;
 	
-	private static final Logger log = LoggerFactory.getLogger(BlockChainReverseReader.class);
+	private static final Logger log = Logger.getLogger(BlockChainReverseReader.class);
 	
 	public BlockChainReverseReader(Iterator<Block> blockFileLoader) {
 		super(blockFileLoader);

@@ -1,22 +1,22 @@
-package bartoszzychal.BlockChainAnalyze.persistance;
+package bartoszzychal.BlockChainAnalyze.index.persistance;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Version;
 
 @MappedSuperclass
-public abstract class BaseEntity {
+public abstract class BaseEntity extends FlatEntity implements Serializable {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.TABLE)
-	private Long id;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
+	
 	@Version
 	private Long version;
 
@@ -34,13 +34,10 @@ public abstract class BaseEntity {
 		updatedAt = LocalDateTime.now();
 	}
 
-	public Long getId() {
-		return id;
-	}
 
 	@Override
 	public String toString() {
-		return " id=" + id + ", version=" + version + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt
+		return " id=" + getId() + ", version=" + version + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt
 				+ "]";
 	}
 

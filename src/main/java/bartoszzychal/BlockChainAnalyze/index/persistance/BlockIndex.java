@@ -1,32 +1,40 @@
-package bartoszzychal.BlockChainAnalyze.persistance;
+package bartoszzychal.BlockChainAnalyze.index.persistance;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
 @Table(name = "BlockIndex")
-public class BlockIndex extends BaseEntity implements Serializable {
+public class BlockIndex extends BaseEntity  {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	
-	@Column(name = "blockHash", unique= true)
+
+	@Column(name = "blockHash", unique = true)
 	private String blockHash;
 
 	@Column(name = "fileName")
 	private String fileName;
-	
+
 	@Column(name = "startFromByte")
 	private Long startFromByte;
-	
+
 	@Column(name = "generatedDate")
 	private LocalDateTime generatedDate;
+
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JoinColumn(name = "blockId")
+	private Set<Transaction> transactions;
 
 	public BlockIndex() {
 	}
@@ -61,6 +69,14 @@ public class BlockIndex extends BaseEntity implements Serializable {
 
 	public void setGeneratedDate(LocalDateTime generatedDate) {
 		this.generatedDate = generatedDate;
+	}
+	
+	public Set<Transaction> getTransactions() {
+		return transactions;
+	}
+
+	public void setTransactions(Set<Transaction> transactions) {
+		this.transactions = transactions;
 	}
 
 	@Override

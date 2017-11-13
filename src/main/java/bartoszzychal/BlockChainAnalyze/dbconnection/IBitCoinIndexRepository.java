@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.bitcoinj.core.Block;
 
-import bartoszzychal.BlockChainAnalyze.persistance.BlockIndex;
+import bartoszzychal.BlockChainAnalyze.index.persistance.BlockIndex;
 
 public interface IBitCoinIndexRepository extends IRepository {
 	public BlockIndex readIndex(String blockHash);
