@@ -9,7 +9,7 @@ import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.core.Transaction;
 import org.bitcoinj.params.MainNetParams;
 
-import bartoszzychal.BlockChainAnalyze.blockchainreader.impl.BlockChainIndexDatabaseReader;
+import bartoszzychal.BlockChainAnalyze.blockchainreader.impl.BlockChainByIndexReader;
 import bartoszzychal.BlockChainAnalyze.blockfileloader.BlockLoader;
 import bartoszzychal.BlockChainAnalyze.dbconnection.IBitCoinIndexRepository;
 import bartoszzychal.BlockChainAnalyze.dbconnection.hsql.HsqlBitcoinIndexRepository;
@@ -48,7 +48,7 @@ public class Runner extends AbstractRunner {
 		FileLoader.setDir("D:/PWR/mgr/Praca Magisterska/BitCoinCore/BitcoinCoreInstall/blocks/");
 		final IBitCoinIndexRepository repository = new HsqlBitcoinIndexRepository();
 		final BlockLoader blockLoader = new BlockLoader(MainNetParams.get(), FileLoader.readFiles());
-		final BlockChainIndexDatabaseReader blockchainReader = new BlockChainIndexDatabaseReader(repository);
+		final BlockChainByIndexReader blockchainReader = new BlockChainByIndexReader(repository);
 		final BlocksConnectionFinder blocksConnectionFinder = new BlocksConnectionFinder();
 		int startHash = 0;
 		int range = startBlockHash.length;

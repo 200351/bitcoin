@@ -4,7 +4,7 @@ import java.time.LocalDate;
 
 import org.bitcoinj.core.Sha256Hash;
 
-import bartoszzychal.BlockChainAnalyze.blockchainreader.impl.BlockChainIndexDatabaseReader;
+import bartoszzychal.BlockChainAnalyze.blockchainreader.impl.BlockChainByIndexReader;
 import bartoszzychal.BlockChainAnalyze.dbconnection.IBitCoinIndexRepository;
 import bartoszzychal.BlockChainAnalyze.dbconnection.hsql.HsqlBitcoinIndexRepository;
 import bartoszzychal.BlockChainAnalyze.fileloader.FileLoader;
@@ -41,7 +41,7 @@ public class TestRunner extends AbstractRunner {
 			TransactionConnectionInput transactionConnectionInput = new TransactionConnectionInput(startDate[i],
 					startBlockHash[i], startTransactionHash[i], connectionsLimit);
 			final IBitCoinIndexRepository repository = new HsqlBitcoinIndexRepository();
-			final BlockChainIndexDatabaseReader blockchainReader = new BlockChainIndexDatabaseReader(repository );
+			final BlockChainByIndexReader blockchainReader = new BlockChainByIndexReader(repository );
 			final TransactionConnectionOutput tc = blocksConnectionFinder.findConnections(transactionConnectionInput, blockchainReader);
 			writeToFile(tc.getConnections(), connectionsLimit, i, 0,  startTransactionHash[i]);
 			tc.getConnections().stream().forEach(c -> System.out.println(c.toRCoinsString()));

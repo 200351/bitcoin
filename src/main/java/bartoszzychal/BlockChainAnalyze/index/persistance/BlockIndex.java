@@ -32,7 +32,7 @@ public class BlockIndex extends BaseEntity  {
 	@Column(name = "generatedDate")
 	private LocalDateTime generatedDate;
 
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@JoinColumn(name = "blockId")
 	private Set<Transaction> transactions;
 

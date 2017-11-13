@@ -30,11 +30,11 @@ public class Transaction extends FlatEntity {
 	@Column(name = "outputSum")
 	private long outputSum;
 	
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@JoinColumn(name = "transationId")
 	 private Set<TransactionInput> inputs;
 	
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@JoinColumn(name = "transationId")
 	private Set<TransactionOutput> outputs;
 

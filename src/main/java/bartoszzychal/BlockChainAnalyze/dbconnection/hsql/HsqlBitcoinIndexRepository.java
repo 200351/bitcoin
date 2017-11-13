@@ -20,6 +20,8 @@ import bartoszzychal.BlockChainAnalyze.index.persistance.BlockIndex;
 
 public class HsqlBitcoinIndexRepository implements IBitCoinIndexRepository {
 
+	private static final int IN_LIMIT = 1001;
+	private final String ADDRESSES_HASH_PARAM = "blockHashParam";
 	private final String BLOCK_HASH_PARAM = "blockHashParam";
 	private final String BLOCK_START_PARAM = "blockStartParam";
 	private final String BLOCK_END_PARAM = "blockEndParam";
@@ -30,9 +32,9 @@ public class HsqlBitcoinIndexRepository implements IBitCoinIndexRepository {
 		BlockIndex blockIndex = null;
 		if (StringUtils.isNotBlank(blockHash)) {
 			final Query query = getEntityManager()
-					.createQuery("select bi from BlockIndex bi where bi.blockHash = :" + BLOCK_HASH_PARAM);
+					.createQuery("select bi from BlockIndex bi where bi.blockHash = :" + ADDRESSES_HASH_PARAM);
 			query.setMaxResults(1);
-			query.setParameter(BLOCK_HASH_PARAM, blockHash);
+			query.setParameter(ADDRESSES_HASH_PARAM, blockHash);
 			openTransaction();
 			List<BlockIndex>blockIndexes = query.getResultList();
 			if (CollectionUtils.isNotEmpty(blockIndexes)) {
@@ -134,6 +136,34 @@ public class HsqlBitcoinIndexRepository implements IBitCoinIndexRepository {
 		openTransaction();
 		getEntityManager().persist(index);
 		closeTransaction();
+	}
+
+	@Override
+	public List<BlockIndex> readIndexedBlocks(LocalDate start, LocalDate end, List<String> addresses) {
+		List<BlockIndex> blockIndexes = null;
+		if (start != null && end != null && CollectionUtils.isNotEmpty(addresses) && addresses.size() < IN_LIMIT) {
+			LocalDateTime startDate = LocalDateTime.of(start, LocalTime.MIN);
+			LocalDateTime endDate = LocalDateTime.of(end, LocalTime.MAX);
+			final Query query = getEntityManager()
+					.createQuery("select bi from BlockIndex bi"
+							+ " inner join Transaction t"
+							+ " inner join TransactionOutput to"
+							+ " where bi.generatedDate >= :" + BLOCK_START_PARAM
+							+ " and bi.generatedDate <= :" + BLOCK_END_PARAM
+							+ " and to.address in (:" + ADDRESSES_HASH_PARAM + ")"
+							+ " order by bi.generatedDate desc");
+			query.setParameter(BLOCK_START_PARAM, startDate);
+			query.setParameter(BLOCK_END_PARAM, endDate);
+			query.setParameter(ADDRESSES_HASH_PARAM, addresses);
+			final List<BlockIndex> resultList = query.getResultList();
+			
+			openTransaction();
+			if (CollectionUtils.isNotEmpty(resultList)) {
+				blockIndexes = resultList;
+			}
+			closeTransaction();
+		}
+		return blockIndexes;
 	}
 }
 	

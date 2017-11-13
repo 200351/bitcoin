@@ -20,17 +20,17 @@ import bartoszzychal.BlockChainAnalyze.fileloader.FileLoader;
 import bartoszzychal.BlockChainAnalyze.index.persistance.BlockIndex;
 import bartoszzychal.BlockChainAnalyze.model.Blockchain;
 
-public class BlockChainIndexDatabaseReader implements IBlockChainReader{
+public class BlockChainByIndexReader implements IBlockChainReader{
 
 	private IBitCoinIndexRepository repository;
 	final static NetworkParameters np = new MainNetParams();
 	final static Context context = new Context(np);
 	final BlockLoader blockLoader;
-	private static final Logger log = Logger.getLogger(BlockChainIndexDatabaseReader.class);
+	private static final Logger log = Logger.getLogger(BlockChainByIndexReader.class);
 	private Iterator<BlockIndex> indexIt = null;
 	private final int BLOCK_COUNT = 30;
 	
-	public BlockChainIndexDatabaseReader(IBitCoinIndexRepository repository) {
+	public BlockChainByIndexReader(IBitCoinIndexRepository repository) {
 		this.repository = repository;
 		this.blockLoader = new BlockLoader(np, FileLoader.readFiles());
 	}

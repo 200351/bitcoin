@@ -12,7 +12,7 @@ import org.bitcoinj.core.Sha256Hash;
 import org.junit.Test;
 
 import bartoszzychal.BlockChainAnalyze.blockchainreader.IBlockChainReader;
-import bartoszzychal.BlockChainAnalyze.blockchainreader.impl.BlockChainIndexDatabaseReader;
+import bartoszzychal.BlockChainAnalyze.blockchainreader.impl.BlockChainByIndexReader;
 import bartoszzychal.BlockChainAnalyze.dbconnection.IBitCoinIndexRepository;
 import bartoszzychal.BlockChainAnalyze.dbconnection.hsql.HsqlBitcoinIndexRepository;
 import bartoszzychal.BlockChainAnalyze.fileloader.FileLoader;
@@ -58,7 +58,7 @@ public class BlocksConnectionFinderTest {
 				connectionsLimit);
 
 		final IBitCoinIndexRepository repository = new HsqlBitcoinIndexRepository();
-		final IBlockChainReader blockchainReader = new BlockChainIndexDatabaseReader(repository);
+		final IBlockChainReader blockchainReader = new BlockChainByIndexReader(repository);
 		final TransactionConnectionOutput findConnections = blocksConnectionFinder
 				.findConnections(transactionConnectionInput, blockchainReader);
 		

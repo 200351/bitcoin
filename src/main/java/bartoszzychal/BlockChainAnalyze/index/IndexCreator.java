@@ -59,6 +59,7 @@ public class IndexCreator {
 	public static void main(String[] args) {
 		FileLoader.setDir("D:/PWR/mgr/PracaMagisterska/BitCoinCore/BitcoinCoreInstall/blocks/");
 		final IndexCreator indexCreator = new IndexCreator(new HsqlBitcoinIndexRepository());
+//		EntityManagerProvider.getEntityManager();
 //		indexCreator.indexing(0, 50);
 //		indexCreator.indexing(51, 100);
 //		indexCreator.indexing(101, 150);
@@ -79,6 +80,7 @@ public class IndexCreator {
 //		indexCreator.indexing(851, 900);
 //		indexCreator.indexing(901, 950);
 //		indexCreator.indexing(951, 975);
+		indexCreator.indexing(0, 975);
 //
 	}
 }
