@@ -5,13 +5,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.log4j.Logger;
 import org.bitcoinj.core.Address;
 import org.bitcoinj.core.TransactionInput;
 import org.bitcoinj.core.TransactionOutput;
 import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.script.Script;
-
-import org.apache.log4j.Logger;
 
 import bartoszzychal.BlockChainAnalyze.model.AbstractInfo;
 import bartoszzychal.BlockChainAnalyze.model.ConnectedInfo;

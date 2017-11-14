@@ -12,7 +12,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "Transaction")
+@Table(name = "Transaction", schema="blockIndex")
 @AttributeOverride(name = "id", column = @Column(name = "transationId"))
 public class Transaction extends FlatEntity {
 

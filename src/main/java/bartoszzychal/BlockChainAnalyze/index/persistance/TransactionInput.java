@@ -6,7 +6,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "TransactionInput")
+@Table(name = "TransactionInput", schema="blockIndex")
 @AttributeOverride(name = "id", column = @Column(name = "inputId"))
 public class TransactionInput extends FlatEntity {
 	

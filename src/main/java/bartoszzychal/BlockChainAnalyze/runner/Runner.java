@@ -105,6 +105,5 @@ public class Runner extends AbstractRunner {
 
 		}
 		// close connection with DB
-		repository.closeConnection();
 	}
 }

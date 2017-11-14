@@ -1,11 +1,10 @@
 package bartoszzychal.BlockChainAnalyze.dbconnection.hsql;
 
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.TimeZone;
+import java.util.Set;
 
 import javax.persistence.Query;
 
@@ -15,8 +14,12 @@ import org.apache.log4j.Logger;
 import org.bitcoinj.core.Block;
 
 import bartoszzychal.BlockChainAnalyze.dbconnection.IBitCoinIndexRepository;
+import bartoszzychal.BlockChainAnalyze.dbconnection.impl.EntityManagerProvider;
 import bartoszzychal.BlockChainAnalyze.index.mapper.PersistanceMapper;
 import bartoszzychal.BlockChainAnalyze.index.persistance.BlockIndex;
+import bartoszzychal.BlockChainAnalyze.index.persistance.Transaction;
+import bartoszzychal.BlockChainAnalyze.index.persistance.TransactionInput;
+import bartoszzychal.BlockChainAnalyze.index.persistance.TransactionOutput;
 
 public class HsqlBitcoinIndexRepository implements IBitCoinIndexRepository {
 
@@ -27,20 +30,23 @@ public class HsqlBitcoinIndexRepository implements IBitCoinIndexRepository {
 	private final String BLOCK_END_PARAM = "blockEndParam";
 	private static final Logger log = Logger.getLogger(HsqlBitcoinIndexRepository.class);
 
+	public HsqlBitcoinIndexRepository() {
+	}
+	
 	@Override
 	public synchronized BlockIndex readIndex(String blockHash) {
 		BlockIndex blockIndex = null;
 		if (StringUtils.isNotBlank(blockHash)) {
-			final Query query = getEntityManager()
+			final Query query = EntityManagerProvider.getEntityManager()
 					.createQuery("select bi from BlockIndex bi where bi.blockHash = :" + BLOCK_HASH_PARAM);
 			query.setMaxResults(1);
 			query.setParameter(BLOCK_HASH_PARAM, blockHash);
-			openTransaction();
+			EntityManagerProvider.beginTransaction();
 			List<BlockIndex>blockIndexes = query.getResultList();
 			if (CollectionUtils.isNotEmpty(blockIndexes)) {
 				blockIndex = blockIndexes.get(0);
 			}
-			closeTransaction();
+			EntityManagerProvider.commit();
 		}
 		return blockIndex;
 	}
@@ -51,7 +57,7 @@ public class HsqlBitcoinIndexRepository implements IBitCoinIndexRepository {
 		if (start != null && end != null) {
 			LocalDateTime startDate = LocalDateTime.of(start, LocalTime.MIN);
 			LocalDateTime endDate = LocalDateTime.of(end, LocalTime.MAX);
-			final Query query = getEntityManager()
+			final Query query = EntityManagerProvider.getEntityManager()
 					.createQuery("select bi from BlockIndex bi"
 							+ " where bi.generatedDate >= :" + BLOCK_START_PARAM
 							+ " and bi.generatedDate <= :" + BLOCK_END_PARAM
@@ -60,11 +66,11 @@ public class HsqlBitcoinIndexRepository implements IBitCoinIndexRepository {
 			query.setParameter(BLOCK_END_PARAM, endDate);
 			final List<BlockIndex> resultList = query.getResultList();
 			
-			openTransaction();
+			EntityManagerProvider.beginTransaction();
 			if (CollectionUtils.isNotEmpty(resultList)) {
 				blockIndexes = resultList;
 			}
-			closeTransaction();
+			EntityManagerProvider.commit();
 		}
 		return blockIndexes;
 	}
@@ -78,9 +84,9 @@ public class HsqlBitcoinIndexRepository implements IBitCoinIndexRepository {
 				blockIndex = PersistanceMapper.map(block);
 				blockIndex.setFileName(fileName);
 				blockIndex.setStartFromByte(startFromByte);
-				openTransaction();
-				getEntityManager().persist(blockIndex);
-				closeTransaction();
+				EntityManagerProvider.beginTransaction();
+				EntityManagerProvider.getEntityManager().persist(blockIndex);
+				EntityManagerProvider.commit();
 			}
 		}
 		return blockIndex;
@@ -121,16 +127,16 @@ public class HsqlBitcoinIndexRepository implements IBitCoinIndexRepository {
 
 	@Override
 	public void removeIndex(BlockIndex index) {
-		openTransaction();
-		getEntityManager().remove(index);
-		closeTransaction();
+		EntityManagerProvider.beginTransaction();
+		EntityManagerProvider.getEntityManager().remove(index);
+		EntityManagerProvider.commit();
 	}
 	
 	@Override
 	public void createIndex(BlockIndex index) {
-		openTransaction();
-		getEntityManager().persist(index);
-		closeTransaction();
+		EntityManagerProvider.beginTransaction();
+		EntityManagerProvider.getEntityManager().persist(index);
+		EntityManagerProvider.commit();
 	}
 
 	@Override
@@ -139,7 +145,7 @@ public class HsqlBitcoinIndexRepository implements IBitCoinIndexRepository {
 		if (start != null && end != null && CollectionUtils.isNotEmpty(addresses) && addresses.size() < IN_LIMIT) {
 			LocalDateTime startDate = LocalDateTime.of(start, LocalTime.MIN);
 			LocalDateTime endDate = LocalDateTime.of(end, LocalTime.MAX);
-			final Query query = getEntityManager()
+			final Query query = EntityManagerProvider.getEntityManager()
 					.createQuery("select bi from BlockIndex bi"
 							+ " inner join Transaction t"
 							+ " inner join TransactionOutput to"
@@ -152,36 +158,38 @@ public class HsqlBitcoinIndexRepository implements IBitCoinIndexRepository {
 			query.setParameter(ADDRESSES_HASH_PARAM, addresses);
 			final List<BlockIndex> resultList = query.getResultList();
 			
-			openTransaction();
+			EntityManagerProvider.beginTransaction();
 			if (CollectionUtils.isNotEmpty(resultList)) {
 				blockIndexes = resultList;
 			}
-			closeTransaction();
+			EntityManagerProvider.commit();
 		}
 		return blockIndexes;
 	}
 
 	@Override
-	public void createNewIndexForBlock(List<BlockIndex> blockIndex, boolean reindex) {
-		openTransaction();
+	public synchronized void createNewIndexForBlock(List<BlockIndex> blockIndex, boolean reindex) {
+		EntityManagerProvider.beginTransaction();
 		for (int i = 0; i < blockIndex.size(); i++) {
 			BlockIndex index = blockIndex.get(i);
 			
 			BlockIndex oldReadIndex = null;
 
 			if (reindex && (oldReadIndex = readIndex(index.getBlockHash())) != null) {
-				getEntityManager().remove(oldReadIndex);
-				getEntityManager().flush();
+				EntityManagerProvider.getEntityManager().remove(oldReadIndex);
+				EntityManagerProvider.getEntityManager().flush();
 			}
-			
-			getEntityManager().persist(index);
-			if (i %  BATCH_SIZE == 0) {
-				getEntityManager().flush();
-				getEntityManager().clear();
+			log.info(i + ".Persist block: " + index.getBlockHash());
+			EntityManagerProvider.getEntityManager().persist(index);
+			if (i % BATCH_SIZE == 0) {
+				log.info(BATCH_SIZE + " Flush.");
+				EntityManagerProvider.getEntityManager().flush();
+				EntityManagerProvider.getEntityManager().clear();
 			}
 		}
 		
-		closeTransaction();
+		EntityManagerProvider.commit();
 	}
+	
 }
 	

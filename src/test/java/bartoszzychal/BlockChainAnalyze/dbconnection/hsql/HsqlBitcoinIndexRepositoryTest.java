@@ -1,7 +1,8 @@
 package bartoszzychal.BlockChainAnalyze.dbconnection.hsql;
 
 import static org.bitcoinj.core.Utils.HEX;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -14,7 +15,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import bartoszzychal.BlockChainAnalyze.dbconnection.IBitCoinIndexRepository;
-import bartoszzychal.BlockChainAnalyze.dbconnection.impl.EntityManagerProvider;
 import bartoszzychal.BlockChainAnalyze.index.persistance.BlockIndex;
 
 public class HsqlBitcoinIndexRepositoryTest {
@@ -61,7 +61,6 @@ public class HsqlBitcoinIndexRepositoryTest {
 		final BlockIndex readIndex = repository.readIndex(hashAsString);
 		assertNotNull(readIndex);
 		System.out.println(readIndex);
-		EntityManagerProvider.closeConnection();
 	}
 
 	@Test
@@ -70,6 +69,7 @@ public class HsqlBitcoinIndexRepositoryTest {
 		final BlockIndex readIndex = repository.readIndex("0000000001151b8e29b49b3821bb12ccfedf2f9dad77d3793e112852c1d6d260");
 		assertNotNull(readIndex);
 		System.out.println(readIndex);
+		repository.removeIndex(readIndex);
 	}
 
 }

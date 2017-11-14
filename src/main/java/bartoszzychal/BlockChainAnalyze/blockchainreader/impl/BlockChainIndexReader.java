@@ -2,7 +2,6 @@ package bartoszzychal.BlockChainAnalyze.blockchainreader.impl;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -13,14 +12,14 @@ import org.apache.log4j.Logger;
 
 import bartoszzychal.BlockChainAnalyze.blockchainreader.IBlockChainIndexReader;
 import bartoszzychal.BlockChainAnalyze.dbconnection.IBitCoinIndexRepository;
+import bartoszzychal.BlockChainAnalyze.dbconnection.IRepository;
 import bartoszzychal.BlockChainAnalyze.index.persistance.BlockIndex;
-import bartoszzychal.BlockChainAnalyze.model.OutputInfo;
-import bartoszzychal.BlockChainAnalyze.model.TransactionConnection;
+import bartoszzychal.BlockChainAnalyze.model.TransactionSearchInfo;
 
 public class BlockChainIndexReader implements IBlockChainIndexReader {
 
-	private static final int IN_LIMIT = 1000;
 	private IBitCoinIndexRepository repository;
+
 	private static final Logger log = Logger.getLogger(BlockChainIndexReader.class);
 
 	public BlockChainIndexReader(IBitCoinIndexRepository repository) {
@@ -28,18 +27,25 @@ public class BlockChainIndexReader implements IBlockChainIndexReader {
 	}
 
 	@Override
-	public List<BlockIndex> readBlockChainFromTo(LocalDate from, LocalDate to,
-			List<TransactionConnection> transactionConnections) {
+	public List<BlockIndex> readBlockIndexFromTo(LocalDate from, LocalDate to,
+			List<TransactionSearchInfo> transactionSearchInfos) {
 		List<BlockIndex> returnBlocks = new ArrayList<>();
 		if (from != null && to != null && !from.isAfter(to)) {
-			if (CollectionUtils.isNotEmpty(transactionConnections)) {
-				List<OutputInfo> outputs = transactionConnections.stream().flatMap(tc -> tc.getOutputInfo().stream())
-						.collect(Collectors.toList());
-				Set<String> addresses = outputs.stream().map(o -> o.getAddress()).collect(Collectors.toSet());
-				List<String> addressesList = new ArrayList<>(addresses);
-				List<List<String>> partitions = ListUtils.partition(addressesList, IN_LIMIT);
+			if (CollectionUtils.isNotEmpty(transactionSearchInfos)) {
+				Set<String> outputs = transactionSearchInfos
+						.stream()
+						.flatMap(tsi -> tsi.getInfo().stream())
+						.map(o -> o.getAddress())
+						.collect(Collectors.toSet());
+				List<List<String>> partitions = ListUtils.partition(new ArrayList<>(outputs), IRepository.IN_LIMIT);
+				log.info("Prepared " + partitions + " partitions.");
+				int count = 0;
 				for (List<String> partition : partitions) {
+					count++;
+					log.info("Search by " + count + "partition.");
 					List<BlockIndex> indexedBlocks = repository.readIndexedBlocks(from, to, partition);
+					log.info("Found " + indexedBlocks == null ? 0
+							: indexedBlocks.size() + " by " + count + "partition.");
 					if (CollectionUtils.isNotEmpty(indexedBlocks)) {
 						returnBlocks.addAll(indexedBlocks);
 					}
@@ -53,4 +59,8 @@ public class BlockChainIndexReader implements IBlockChainIndexReader {
 		return returnBlocks;
 	}
 
+	@Override
+	public BlockIndex readIndex(String blockHash) {
+		return repository.readIndex(blockHash);
+	}
 }

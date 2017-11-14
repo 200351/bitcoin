@@ -12,7 +12,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "BlockIndex")
+@Table(name = "BlockIndex", schema="blockIndex")
 public class BlockIndex extends BaseEntity  {
 
 	/**

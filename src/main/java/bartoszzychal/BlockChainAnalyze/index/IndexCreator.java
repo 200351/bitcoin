@@ -7,23 +7,23 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.bitcoinj.params.MainNetParams;
-
 import org.apache.log4j.Logger;
+import org.bitcoinj.params.MainNetParams;
 
 import bartoszzychal.BlockChainAnalyze.dbconnection.IBitCoinIndexRepository;
 import bartoszzychal.BlockChainAnalyze.dbconnection.IRepository;
 import bartoszzychal.BlockChainAnalyze.dbconnection.hsql.HsqlBitcoinIndexRepository;
-import bartoszzychal.BlockChainAnalyze.dbconnection.impl.EntityManagerProvider;
 import bartoszzychal.BlockChainAnalyze.fileloader.FileLoader;
 import bartoszzychal.BlockChainAnalyze.index.loader.BlockIndexLoader;
 import bartoszzychal.BlockChainAnalyze.index.persistance.BlockIndex;
 
-public class IndexCreator {
+public class IndexCreator implements Runnable {
 	private static final Logger log = Logger.getLogger(IndexCreator.class);
 
 	private IBitCoinIndexRepository repository;
-
+	private Integer startFile;
+	private Integer endFile;
+	
 	public IndexCreator(IBitCoinIndexRepository repository) {
 		this.repository = repository;
 	}
@@ -31,6 +31,7 @@ public class IndexCreator {
 	public void indexing(Integer startFile, Integer endFile) {
 		final List<File> files = prepareFilesToIndexing(startFile, endFile);
 		int count = 0;
+		log.info("Start");
 		if (CollectionUtils.isNotEmpty(files)) {
 			final BlockIndexLoader blockIndexLoader = new BlockIndexLoader(MainNetParams.get(), files);
 			final List<BlockIndex> indexesToPersist = new ArrayList<>();
@@ -50,7 +51,7 @@ public class IndexCreator {
 			}
 			
 		}
-		EntityManagerProvider.closeConnection();
+		log.info("Success End.");
 	}
 
 	private List<File> prepareFilesToIndexing(Integer startFile, Integer endFile) {
@@ -58,7 +59,8 @@ public class IndexCreator {
 			final String fileName = file.getName().replaceAll("blk", "").replaceAll(".dat", "");
 			if (StringUtils.isNumeric(fileName)) {
 				final Integer fileNameNumber = Integer.valueOf(fileName);
-				if (fileNameNumber >= startFile && fileNameNumber <= endFile) {
+				if (fileNameNumber >= startFile && fileNameNumber <= endFile && fileNameNumber != 81
+						&& fileNameNumber != 82) {
 					return true;
 				}
 			}
@@ -66,31 +68,44 @@ public class IndexCreator {
 		}).collect(Collectors.toList());
 	}
 
+	@Override
+	public void run() {
+		indexing(getStartFile(), getEndFile());
+	}
+	
 	public static void main(String[] args) {
 		FileLoader.setDir("D:/PWR/mgr/PracaMagisterska/BitCoinCore/BitcoinCoreInstall/blocks/");
-		final IndexCreator indexCreator = new IndexCreator(new HsqlBitcoinIndexRepository());
-//		EntityManagerProvider.getEntityManager();
-//		indexCreator.indexing(0, 50);
-//		indexCreator.indexing(51, 100);
-//		indexCreator.indexing(101, 150);
-//		indexCreator.indexing(151, 200);
-//		indexCreator.indexing(201, 250);
-//		indexCreator.indexing(251, 300);
-//		indexCreator.indexing(301, 350);
-//		indexCreator.indexing(351, 400);
-//		indexCreator.indexing(401, 450);
-//		indexCreator.indexing(451, 500);
-//		indexCreator.indexing(501, 550);
-//		indexCreator.indexing(551, 600);
-//		indexCreator.indexing(601, 650);
-//		indexCreator.indexing(651, 700);
-//		indexCreator.indexing(701, 750);
-//		indexCreator.indexing(751, 800);
-//		indexCreator.indexing(801, 850);
-//		indexCreator.indexing(851, 900);
-//		indexCreator.indexing(901, 950);
-//		indexCreator.indexing(951, 975);
-		indexCreator.indexing(0, 975);
-//
+		
+		int skip = 0;
+		for(int i = 55; i < 56; i = i + skip + 1) {
+			final IndexCreator indexCreator = new IndexCreator(new HsqlBitcoinIndexRepository());
+			indexCreator.setStartFile(Integer.valueOf(i));
+			indexCreator.setEndFile(Integer.valueOf(i + skip));
+			final Thread thread = new Thread(indexCreator);
+			thread.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+		         public void uncaughtException(Thread t, Throwable e) {
+		            log.info(t + " throws exception: " + e);
+		         }
+		      });
+			thread.start();
+		}
+		
 	}
+
+	public Integer getStartFile() {
+		return startFile;
+	}
+
+	public void setStartFile(Integer startFile) {
+		this.startFile = startFile;
+	}
+
+	public Integer getEndFile() {
+		return endFile;
+	}
+
+	public void setEndFile(Integer endFile) {
+		this.endFile = endFile;
+	}
+
 }

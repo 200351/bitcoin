@@ -2,31 +2,50 @@ package bartoszzychal.BlockChainAnalyze.dbconnection.impl;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.FlushModeType;
 import javax.persistence.Persistence;
 
 public class EntityManagerProvider {
 
-	private static EntityManager entityManager;
-	private static EntityManagerFactory factory;
-	
-	private EntityManagerProvider() {
+	private static final EntityManagerFactory emf;
+	private static final ThreadLocal<EntityManager> threadLocal;
+
+	static {
+		emf = Persistence.createEntityManagerFactory("BlockchainIndex");
+		threadLocal = new ThreadLocal<EntityManager>();
 	}
-	
-	public static synchronized EntityManager getEntityManager() {
-		if (entityManager == null) {
-			EntityManagerFactory emfactory = Persistence.createEntityManagerFactory( "BlockchainIndex" );
-			factory = emfactory;
-			entityManager = emfactory.createEntityManager();
-			entityManager.setFlushMode(FlushModeType.COMMIT);
+
+	public static EntityManager getEntityManager() {
+		EntityManager em = threadLocal.get();
+
+		if (em == null) {
+			em = emf.createEntityManager();
+			// set your flush mode here
+			threadLocal.set(em);
 		}
-		return entityManager;
+		return em;
 	}
-	
-	public static synchronized void closeConnection() {
-		if (factory.isOpen()) {
-			factory.close();
-			entityManager = null;
+
+	public static void closeEntityManager() {
+		EntityManager em = threadLocal.get();
+		if (em != null) {
+			em.close();
+			threadLocal.set(null);
 		}
+	}
+
+	public static void closeEntityManagerFactory() {
+		emf.close();
+	}
+
+	public static void beginTransaction() {
+		getEntityManager().getTransaction().begin();
+	}
+
+	public static void rollback() {
+		getEntityManager().getTransaction().rollback();
+	}
+
+	public static void commit() {
+		getEntityManager().getTransaction().commit();
 	}
 }

@@ -1,6 +1,5 @@
 package bartoszzychal.BlockChainAnalyze.finder;
 
-import java.text.DecimalFormat;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -11,11 +10,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.log4j.Logger;
 import org.bitcoinj.core.Block;
 import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.core.Transaction;
-
-import org.apache.log4j.Logger;
 
 import bartoszzychal.BlockChainAnalyze.blockchainreader.IBlockChainReader;
 import bartoszzychal.BlockChainAnalyze.generator.TransactionSearchInfoGenerator;
