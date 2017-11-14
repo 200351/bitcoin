@@ -2,6 +2,7 @@ package bartoszzychal.BlockChainAnalyze.dbconnection.impl;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.FlushModeType;
 import javax.persistence.Persistence;
 
 public class EntityManagerProvider {
@@ -17,6 +18,7 @@ public class EntityManagerProvider {
 			EntityManagerFactory emfactory = Persistence.createEntityManagerFactory( "BlockchainIndex" );
 			factory = emfactory;
 			entityManager = emfactory.createEntityManager();
+			entityManager.setFlushMode(FlushModeType.COMMIT);
 		}
 		return entityManager;
 	}

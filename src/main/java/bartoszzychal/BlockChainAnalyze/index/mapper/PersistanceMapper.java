@@ -26,7 +26,7 @@ public class PersistanceMapper {
 		final LocalDateTime parse = Utils.parse(block.getTimeSeconds());
 		blockIndex.setGeneratedDate(parse);
 		if (CollectionUtils.isNotEmpty(block.getTransactions())) {
-			blockIndex.setTransactions(block.getTransactions().stream().map(PersistanceMapper::map).collect(Collectors.toSet()));
+			blockIndex.setTransactions(block.getTransactions().parallelStream().map(PersistanceMapper::map).collect(Collectors.toSet()));
 		}
 		return blockIndex;
 	}
@@ -40,7 +40,7 @@ public class PersistanceMapper {
 			transaction.setInputs(
 					transactionToMap
 					.getInputs()
-					.stream()
+					.parallelStream()
 					.map(PersistanceMapper::map)
 					.filter(to -> to != null)
 					.collect(Collectors.toSet())
@@ -50,7 +50,7 @@ public class PersistanceMapper {
 			transaction.setOutputs(
 					transactionToMap
 					.getOutputs()
-					.stream()
+					.parallelStream()
 					.map(PersistanceMapper::map)
 					.filter(to -> to != null)
 					.collect(Collectors.toSet())

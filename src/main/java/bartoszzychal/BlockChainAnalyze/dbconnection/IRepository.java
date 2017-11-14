@@ -6,6 +6,9 @@ import bartoszzychal.BlockChainAnalyze.dbconnection.impl.EntityManagerProvider;
 
 public interface IRepository {
 	
+	public static int BATCH_SIZE = 30;
+	public static int COLLECTION_SIZE = 300;
+	
 	default void openTransaction() {
 		EntityManagerProvider.getEntityManager().getTransaction( ).begin();
 	}

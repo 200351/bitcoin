@@ -32,9 +32,9 @@ public class HsqlBitcoinIndexRepository implements IBitCoinIndexRepository {
 		BlockIndex blockIndex = null;
 		if (StringUtils.isNotBlank(blockHash)) {
 			final Query query = getEntityManager()
-					.createQuery("select bi from BlockIndex bi where bi.blockHash = :" + ADDRESSES_HASH_PARAM);
+					.createQuery("select bi from BlockIndex bi where bi.blockHash = :" + BLOCK_HASH_PARAM);
 			query.setMaxResults(1);
-			query.setParameter(ADDRESSES_HASH_PARAM, blockHash);
+			query.setParameter(BLOCK_HASH_PARAM, blockHash);
 			openTransaction();
 			List<BlockIndex>blockIndexes = query.getResultList();
 			if (CollectionUtils.isNotEmpty(blockIndexes)) {
@@ -84,11 +84,6 @@ public class HsqlBitcoinIndexRepository implements IBitCoinIndexRepository {
 			}
 		}
 		return blockIndex;
-	}
-
-	private LocalDateTime parse(long time) {
-		return LocalDateTime.ofInstant(Instant.ofEpochMilli(time), 
-                TimeZone.getDefault().toZoneId());  
 	}
 
 	@Override
@@ -164,6 +159,29 @@ public class HsqlBitcoinIndexRepository implements IBitCoinIndexRepository {
 			closeTransaction();
 		}
 		return blockIndexes;
+	}
+
+	@Override
+	public void createNewIndexForBlock(List<BlockIndex> blockIndex, boolean reindex) {
+		openTransaction();
+		for (int i = 0; i < blockIndex.size(); i++) {
+			BlockIndex index = blockIndex.get(i);
+			
+			BlockIndex oldReadIndex = null;
+
+			if (reindex && (oldReadIndex = readIndex(index.getBlockHash())) != null) {
+				getEntityManager().remove(oldReadIndex);
+				getEntityManager().flush();
+			}
+			
+			getEntityManager().persist(index);
+			if (i %  BATCH_SIZE == 0) {
+				getEntityManager().flush();
+				getEntityManager().clear();
+			}
+		}
+		
+		closeTransaction();
 	}
 }
 	

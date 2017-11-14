@@ -1,6 +1,7 @@
 package bartoszzychal.BlockChainAnalyze.index;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -11,6 +12,7 @@ import org.bitcoinj.params.MainNetParams;
 import org.apache.log4j.Logger;
 
 import bartoszzychal.BlockChainAnalyze.dbconnection.IBitCoinIndexRepository;
+import bartoszzychal.BlockChainAnalyze.dbconnection.IRepository;
 import bartoszzychal.BlockChainAnalyze.dbconnection.hsql.HsqlBitcoinIndexRepository;
 import bartoszzychal.BlockChainAnalyze.dbconnection.impl.EntityManagerProvider;
 import bartoszzychal.BlockChainAnalyze.fileloader.FileLoader;
@@ -31,14 +33,22 @@ public class IndexCreator {
 		int count = 0;
 		if (CollectionUtils.isNotEmpty(files)) {
 			final BlockIndexLoader blockIndexLoader = new BlockIndexLoader(MainNetParams.get(), files);
+			final List<BlockIndex> indexesToPersist = new ArrayList<>();
 			while (blockIndexLoader.hasNext()) {
 				final BlockIndex index = blockIndexLoader.next();
 				if (index != null) {
-					final BlockIndex newIndex = repository.createNewIndexForBlock(index, false);
-					count = newIndex == null ? count : count + 1;
-					log.info("Generated " + count + " Index. " + newIndex.getBlockHash());
+					indexesToPersist.add(index);
+					count++;
+				}
+				if (count % IRepository.COLLECTION_SIZE == 0) {
+					if (CollectionUtils.isNotEmpty(indexesToPersist)) {
+						repository.createNewIndexForBlock(indexesToPersist, false);
+						log.info("Generated " + count + " Index. ");
+						indexesToPersist.clear();
+					}
 				}
 			}
+			
 		}
 		EntityManagerProvider.closeConnection();
 	}
