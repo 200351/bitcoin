@@ -86,4 +86,10 @@ public class BlockChainReader extends AbstractBlockChainReader implements IBlock
 
 		return result;
 	}
+
+	@Override
+	public Block readBlock(String blockHash) {
+		throw new UnsupportedOperationException();
+	}
+
 }

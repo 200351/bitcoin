@@ -2,6 +2,8 @@ package bartoszzychal.BlockChainAnalyze.index;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,6 +18,8 @@ import bartoszzychal.BlockChainAnalyze.dbconnection.hsql.HsqlBitcoinIndexReposit
 import bartoszzychal.BlockChainAnalyze.fileloader.FileLoader;
 import bartoszzychal.BlockChainAnalyze.index.loader.BlockIndexLoader;
 import bartoszzychal.BlockChainAnalyze.index.persistance.BlockIndex;
+import bartoszzychal.BlockChainAnalyze.model.IndexProperties;
+import bartoszzychal.BlockChainAnalyze.model.IndexProperties.Level;
 
 public class IndexCreator implements Runnable {
 	private static final Logger log = Logger.getLogger(IndexCreator.class);
@@ -23,6 +27,8 @@ public class IndexCreator implements Runnable {
 	private IBitCoinIndexRepository repository;
 	private Integer startFile;
 	private Integer endFile;
+	private static LinkedList<File> files;
+	
 	
 	public IndexCreator(IBitCoinIndexRepository repository) {
 		this.repository = repository;
@@ -54,33 +60,89 @@ public class IndexCreator implements Runnable {
 		log.info("Success End.");
 	}
 
-	private List<File> prepareFilesToIndexing(Integer startFile, Integer endFile) {
-		return FileLoader.readFiles().stream().filter(file -> {
+	public void indexing(File file) {
+		int count = 0;
+		log.info("Start " + file.getName());
+		final List<File> files = new ArrayList<>();
+		if (file != null) {
+			files.add(file);
+			final BlockIndexLoader blockIndexLoader = new BlockIndexLoader(MainNetParams.get(), files);
+			final List<BlockIndex> indexesToPersist = new ArrayList<>();
+			while (blockIndexLoader.hasNext()) {
+				final BlockIndex index = blockIndexLoader.next();
+				if (index != null) {
+					indexesToPersist.add(index);
+					count++;
+				}
+				if (count % IRepository.COLLECTION_SIZE == 0 || !blockIndexLoader.hasNext()) {
+					if (CollectionUtils.isNotEmpty(indexesToPersist)) {
+						repository.createNewIndexForBlock(indexesToPersist, false);
+						log.info("Generated " + count + " Index. ");
+						indexesToPersist.clear();
+					}
+				}
+			}
+			
+		}
+		log.info("Success End " + file.getName());
+	}
+
+	public static List<File> prepareFilesToIndexing(Integer startFile, Integer endFile) {
+		return Collections.synchronizedList(FileLoader.readFiles().stream().filter(file -> {
 			final String fileName = file.getName().replaceAll("blk", "").replaceAll(".dat", "");
 			if (StringUtils.isNumeric(fileName)) {
 				final Integer fileNameNumber = Integer.valueOf(fileName);
-				if (fileNameNumber >= startFile && fileNameNumber <= endFile && fileNameNumber != 81
-						&& fileNameNumber != 82) {
+				if (fileNameNumber >= startFile && fileNameNumber <= endFile) {
 					return true;
 				}
 			}
 			return false;
-		}).collect(Collectors.toList());
+		}).collect(Collectors.toList()));
+	}
+
+	public static void prepareConcurenceFilesToIndexing(Integer startFile, Integer endFile) {
+		files = new LinkedList<>(FileLoader.readFiles().stream().filter(file -> {
+			final String fileName = file.getName().replaceAll("blk", "").replaceAll(".dat", "");
+			if (StringUtils.isNumeric(fileName)) {
+				final Integer fileNameNumber = Integer.valueOf(fileName);
+				if (fileNameNumber >= startFile && fileNameNumber <= endFile) {
+					return true;
+				}
+			}
+			return false;
+		}).collect(Collectors.toList()));
+	}
+	
+	private synchronized File getFileToIndexing() {
+		File first = null;
+		synchronized (files) {
+			if (CollectionUtils.isNotEmpty(files)) {
+				first = files.getFirst();
+				files.removeFirst();
+			}
+		}
+		return first;
 	}
 
 	@Override
 	public void run() {
-		indexing(getStartFile(), getEndFile());
+		File file = getFileToIndexing();
+		while(file != null) {
+			synchronized (files) {
+				indexing(file);
+				file = getFileToIndexing();
+			}
+		}
 	}
 	
 	public static void main(String[] args) {
 		FileLoader.setDir("D:/PWR/mgr/PracaMagisterska/BitCoinCore/BitcoinCoreInstall/blocks/");
+		IndexCreator.prepareConcurenceFilesToIndexing(0, 975);
+		IndexProperties.setLevel(Level.BLOCK_LEVEL);
 		
-		int skip = 0;
-		for(int i = 55; i < 56; i = i + skip + 1) {
+		int nodes = 30;
+		for (int i = 0; i < nodes; i++) {
 			final IndexCreator indexCreator = new IndexCreator(new HsqlBitcoinIndexRepository());
-			indexCreator.setStartFile(Integer.valueOf(i));
-			indexCreator.setEndFile(Integer.valueOf(i + skip));
 			final Thread thread = new Thread(indexCreator);
 			thread.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
 		         public void uncaughtException(Thread t, Throwable e) {
@@ -89,7 +151,6 @@ public class IndexCreator implements Runnable {
 		      });
 			thread.start();
 		}
-		
 	}
 
 	public Integer getStartFile() {

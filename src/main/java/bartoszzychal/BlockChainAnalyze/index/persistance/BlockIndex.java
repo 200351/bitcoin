@@ -7,13 +7,12 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
 @Table(name = "BlockIndex", schema="blockIndex")
-public class BlockIndex extends BaseEntity  {
+public class BlockIndex extends FlatEntity  {
 
 	/**
 	 * 
@@ -22,6 +21,9 @@ public class BlockIndex extends BaseEntity  {
 
 	@Column(name = "blockHash", unique = true)
 	private String blockHash;
+
+	@Column(name = "prevBlockHash")
+	private String prevBlockHash;
 
 	@Column(name = "fileName")
 	private String fileName;
@@ -32,8 +34,7 @@ public class BlockIndex extends BaseEntity  {
 	@Column(name = "generatedDate")
 	private LocalDateTime generatedDate;
 
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	@JoinColumn(name = "blockId")
+	@OneToMany(mappedBy= "blockIndex", fetch=FetchType.LAZY)
 	private Set<Transaction> transactions;
 
 	public BlockIndex() {
@@ -79,9 +80,19 @@ public class BlockIndex extends BaseEntity  {
 		this.transactions = transactions;
 	}
 
+	public String getPrevBlockHash() {
+		return prevBlockHash;
+	}
+
+	public void setPrevBlockHash(String prevBlockHash) {
+		this.prevBlockHash = prevBlockHash;
+	}
+
 	@Override
 	public String toString() {
-		return "BlockIndex [bitcoinHash=" + blockHash + ", fileName=" + fileName + ", startFromByte=" + startFromByte
-				+ ", generatedDate=" + generatedDate + "]";
+		return "BlockIndex [blockHash=" + blockHash + ", prevBlockHash=" + prevBlockHash + ", fileName=" + fileName
+				+ ", startFromByte=" + startFromByte + ", generatedDate=" + generatedDate + "]";
 	}
+	
+	
 }

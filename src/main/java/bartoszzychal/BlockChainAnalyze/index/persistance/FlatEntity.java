@@ -19,11 +19,15 @@ public abstract class FlatEntity implements Serializable {
 	
 	@Id
 	@Column(name = "id", unique = true, nullable = false)
-	@SequenceGenerator(name = "SequenceIdGenerator", sequenceName = "SEQ_BLOCKINDEX")
+	@SequenceGenerator(name = "SequenceIdGenerator", sequenceName = "SEQ_BLOCKINDEX", allocationSize=1)
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SequenceIdGenerator")
 	private Long id;
 	
 	public Long getId() {
 		return id;
 	}
+
+	public void setId(Long id) {
+	}
+	
 }

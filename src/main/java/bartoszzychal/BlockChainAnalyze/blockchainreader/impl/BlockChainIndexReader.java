@@ -1,6 +1,7 @@
 package bartoszzychal.BlockChainAnalyze.blockchainreader.impl;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -14,6 +15,7 @@ import bartoszzychal.BlockChainAnalyze.blockchainreader.IBlockChainIndexReader;
 import bartoszzychal.BlockChainAnalyze.dbconnection.IBitCoinIndexRepository;
 import bartoszzychal.BlockChainAnalyze.dbconnection.IRepository;
 import bartoszzychal.BlockChainAnalyze.index.persistance.BlockIndex;
+import bartoszzychal.BlockChainAnalyze.index.persistance.Transaction;
 import bartoszzychal.BlockChainAnalyze.model.TransactionSearchInfo;
 
 public class BlockChainIndexReader implements IBlockChainIndexReader {
@@ -38,14 +40,14 @@ public class BlockChainIndexReader implements IBlockChainIndexReader {
 						.map(o -> o.getAddress())
 						.collect(Collectors.toSet());
 				List<List<String>> partitions = ListUtils.partition(new ArrayList<>(outputs), IRepository.IN_LIMIT);
-				log.info("Prepared " + partitions + " partitions.");
+				log.info("Prepared " + partitions.size() + " partitions.");
 				int count = 0;
 				for (List<String> partition : partitions) {
 					count++;
 					log.info("Search by " + count + "partition.");
 					List<BlockIndex> indexedBlocks = repository.readIndexedBlocks(from, to, partition);
 					log.info("Found " + indexedBlocks == null ? 0
-							: indexedBlocks.size() + " by " + count + "partition.");
+							: indexedBlocks.size() + " by " + count + " partition.");
 					if (CollectionUtils.isNotEmpty(indexedBlocks)) {
 						returnBlocks.addAll(indexedBlocks);
 					}
@@ -56,6 +58,35 @@ public class BlockChainIndexReader implements IBlockChainIndexReader {
 			final List<BlockIndex> indexedBlocks = repository.readIndexedBlocks(from, to);
 			returnBlocks = indexedBlocks;
 		}
+		return returnBlocks;
+	}
+	@Override
+	public List<Transaction> readTransactionsFromTo(LocalDateTime from, LocalDateTime to,
+			List<TransactionSearchInfo> transactionSearchInfos) {
+		List<Transaction> returnBlocks = new ArrayList<>();
+		if (from != null && to != null && !from.isAfter(to)) {
+			if (CollectionUtils.isNotEmpty(transactionSearchInfos)) {
+				Set<String> outputs = transactionSearchInfos
+						.stream()
+						.flatMap(tsi -> tsi.getInfo().stream())
+						.map(o -> o.getAddress())
+						.collect(Collectors.toSet());
+				List<List<String>> partitions = ListUtils.partition(new ArrayList<>(outputs), IRepository.IN_LIMIT);
+				log.info("Prepared " + partitions.size() + " partitions.");
+				int count = 0;
+				for (List<String> partition : partitions) {
+					count++;
+					log.info("Search by " + count + "partition.");
+					List<Transaction> indexedBlocks = repository.readTransactionBlocks(from, to, partition);
+					log.info("Found " + indexedBlocks == null ? 0
+							: indexedBlocks.size() + " by " + count + " partition.");
+					if (CollectionUtils.isNotEmpty(indexedBlocks)) {
+						returnBlocks.addAll(indexedBlocks);
+					}
+				}
+				
+			}
+		} 
 		return returnBlocks;
 	}
 

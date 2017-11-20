@@ -9,7 +9,6 @@
 			<property name="javax.persistence.jdbc.password" value="blockIndex2017" />
 			<property name="javax.persistence.jdbc.url" value="jdbc:oracle:thin:@127.0.0.1:1521:orcl2" />
 			<property name="hibernate.dialect" value="org.hibernate.dialect.Oracle10gDialect" />
-			<property name="hibernate.hbm2ddl.auto" value="validate" />
 			<property name="hibernate.show_sql" value="false" />
 
 			<property name="hibernate.connection.provider_class"

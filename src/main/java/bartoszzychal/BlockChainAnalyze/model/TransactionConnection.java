@@ -10,6 +10,7 @@ import bartoszzychal.BlockChainAnalyze.mapper.InfoMapper;
 
 public class TransactionConnection {
 
+	private Long id;
 	private Sha256Hash inputBlockHash;
 	private Sha256Hash outputBlockHash;
 	private Sha256Hash inputTransactionHash;
@@ -136,22 +137,30 @@ public class TransactionConnection {
 	}
 
 	public String toShortString() {
-		return "InputTransactionHash=" + inputTransactionHash + ", outputTransactionHash=" + outputTransactionHash
+		return id + ". " + "InputTransactionHash=" + inputTransactionHash + ", outputTransactionHash=" + outputTransactionHash
 				+ ", outputCoin=" + countCoins(outputInfo).toFriendlyString() + ", connectedAddresses=" + reduceAddresses(connectedInfo)
 				+ ", connectedCoin=" + countCoins(connectedInfo).toFriendlyString();
 	}
 
 	public String toFullString() {
 		return inputTransactionHash + " " + outputTransactionHash + " " + inputBlockHash + " " + outputBlockHash + " "
-				+ outputTime + " " + countCoins(connectedInfo).toFriendlyString();
+				+ outputTime + " " + countCoins(connectedInfo).toFriendlyString()  + " " + id;
 	}
 
 	public String toRCoinsString() {
-		return inputTransactionHash + " " + outputTransactionHash + " " + countCoins(connectedInfo).toPlainString();
+		return inputTransactionHash + " " + outputTransactionHash + " " + countCoins(connectedInfo).toPlainString() + " " + id;
 	}
 	
 	public String toRTimeString() {
-		return inputTransactionHash + " " + outputTransactionHash + " " + outputTime;
+		return inputTransactionHash + " " + outputTransactionHash + " " + outputTime + " " + id;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 }

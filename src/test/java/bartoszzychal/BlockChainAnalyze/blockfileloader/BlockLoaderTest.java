@@ -21,7 +21,7 @@ public class BlockLoaderTest {
 	
 	@Test
 	public void test() {
-		BlockLoader loader = new BlockLoader(np, FileLoader.readFiles());	
+		BlockLoader loader = new BlockLoader(FileLoader.readFiles());	
 		final IBitCoinIndexRepository repository = new HsqlBitcoinIndexRepository();
 		final BlockIndex readIndex = repository.readIndex("0000000000029af88c2052bf97cbb90a9d3307040a37f6260d124d076694f5c1");;
 		final Block readBlock = loader.readBlock(readIndex);

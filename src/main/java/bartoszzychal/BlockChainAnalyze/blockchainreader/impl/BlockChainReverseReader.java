@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.log4j.Logger;
 import org.bitcoinj.core.Block;
 import org.bitcoinj.core.Context;
 import org.bitcoinj.core.NetworkParameters;
@@ -12,8 +13,6 @@ import org.bitcoinj.core.PrunedException;
 import org.bitcoinj.core.VerificationException;
 import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.store.BlockStoreException;
-
-import org.apache.log4j.Logger;
 
 import bartoszzychal.BlockChainAnalyze.blockchainreader.IBlockChainReader;
 import bartoszzychal.BlockChainAnalyze.blockfileloader.BlockFileReverseLoader;
@@ -103,4 +102,10 @@ public class BlockChainReverseReader extends AbstractBlockChainReader implements
 		}
 		return counter;
 	}
+
+	@Override
+	public Block readBlock(String blockHash) {
+		throw new UnsupportedOperationException();
+	}
+
 }

@@ -1,6 +1,7 @@
 package bartoszzychal.BlockChainAnalyze.runner;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 
 import org.bitcoinj.core.Sha256Hash;
 
@@ -38,13 +39,14 @@ public class TestRunner extends AbstractRunner {
 		for (int i = 0; i < startBlockHash.length; i++) {
 			FileLoader.setDir("D:/PWR/mgr/Praca Magisterska/BitCoinCore/BitcoinCoreInstall/blocks/");
 			final BlocksConnectionFinder blocksConnectionFinder = new BlocksConnectionFinder();
+			ArrayList<Sha256Hash> startTransactionHash = new ArrayList<>();
 			TransactionConnectionInput transactionConnectionInput = new TransactionConnectionInput(startDate[i],
-					startBlockHash[i], startTransactionHash[i], connectionsLimit);
+					startBlockHash[i], startTransactionHash, connectionsLimit);
 			final IBitCoinIndexRepository repository = new HsqlBitcoinIndexRepository();
 			final BlockChainByIndexReader blockchainReader = new BlockChainByIndexReader(repository );
-			final TransactionConnectionOutput tc = blocksConnectionFinder.findConnections(transactionConnectionInput, blockchainReader);
-			writeToFile(tc.getConnections(), connectionsLimit, i, 0,  startTransactionHash[i]);
-			tc.getConnections().stream().forEach(c -> System.out.println(c.toRCoinsString()));
+			final TransactionConnectionOutput tc = blocksConnectionFinder.findConnections(transactionConnectionInput, blockchainReader, null);
+//			writeToFile(tc.getConnections(), connectionsLimit, i, 0,  startTransactionHash.get(0));
+//			tc.getConnections().stream().forEach(c -> System.out.println(c.toRCoinsString()));
 
 		}
 

@@ -1,31 +1,43 @@
 package bartoszzychal.BlockChainAnalyze.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class TransactionConnectionOutput {
 
 	private final TransactionConnectionInput transactionConnectionInput;
-	private final List<TransactionConnection> connections;
+	private final List<ConnectionFinderOutput> connections;
 	private final Boolean connectionsFoundSuccess;
+	private final List<TransactionConnection> transactionConnections;
 	
 	public TransactionConnectionOutput(TransactionConnectionInput transactionConnectionInput,
-			List<TransactionConnection> connections) {
+			List<ConnectionFinderOutput> connections) {
 		this.transactionConnectionInput = transactionConnectionInput;
 		this.connections = connections;
 		this.connectionsFoundSuccess = Boolean.TRUE;
+		transactionConnections = null;
+	}
+
+	public TransactionConnectionOutput(TransactionConnectionInput transactionConnectionInput,
+			ArrayList<TransactionConnection> connections) {
+		this.transactionConnectionInput = null;
+		this.connections = null;
+		this.connectionsFoundSuccess = Boolean.TRUE;
+		this.transactionConnections = connections;
 	}
 
 	public TransactionConnectionOutput(Boolean failed) {
 		this.transactionConnectionInput = null;
 		this.connections = null;
 		this.connectionsFoundSuccess = failed;
+		transactionConnections = null;
 	}
 
 	public TransactionConnectionInput getTransactionConnectionInput() {
 		return transactionConnectionInput;
 	}
 
-	public List<TransactionConnection> getConnections() {
+	public List<ConnectionFinderOutput> getConnections() {
 		return connections;
 	}
 
@@ -33,4 +45,8 @@ public class TransactionConnectionOutput {
 		return connectionsFoundSuccess;
 	}
 
+	public List<TransactionConnection> getTransactionConnections() {
+		return transactionConnections;
+	}
+	
 }

@@ -72,4 +72,9 @@ public class HsqlBitcoinIndexRepositoryTest {
 		repository.removeIndex(readIndex);
 	}
 
+//	@Test
+//	public void testReadBlockFromTo() {
+//		final IBitCoinIndexRepository repository = new HsqlBitcoinIndexRepository();
+//		repository.re
+//	}
 }

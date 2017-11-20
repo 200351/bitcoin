@@ -15,6 +15,7 @@ import bartoszzychal.BlockChainAnalyze.index.persistance.BlockIndex;
 import bartoszzychal.BlockChainAnalyze.index.persistance.Transaction;
 import bartoszzychal.BlockChainAnalyze.index.persistance.TransactionInput;
 import bartoszzychal.BlockChainAnalyze.index.persistance.TransactionOutput;
+import bartoszzychal.BlockChainAnalyze.model.IndexProperties;
 import bartoszzychal.BlockChainAnalyze.utils.Utils;
 
 public class PersistanceMapper {
@@ -23,20 +24,22 @@ public class PersistanceMapper {
 	public static BlockIndex map(Block block) {
 		final BlockIndex blockIndex = new BlockIndex();
 		blockIndex.setBlockHash(block.getHashAsString());
+		blockIndex.setPrevBlockHash(block.getPrevBlockHash().toString());
 		final LocalDateTime parse = Utils.parse(block.getTimeSeconds());
 		blockIndex.setGeneratedDate(parse);
-		if (CollectionUtils.isNotEmpty(block.getTransactions())) {
+		if (IndexProperties.isIndexTransaction() && CollectionUtils.isNotEmpty(block.getTransactions())) {
 			blockIndex.setTransactions(block.getTransactions().parallelStream().map(PersistanceMapper::map).collect(Collectors.toSet()));
+			blockIndex.getTransactions().parallelStream().forEach(t -> t.setBlockIndex(blockIndex));
 		}
 		return blockIndex;
 	}
-	
+
 	public static Transaction map(org.bitcoinj.core.Transaction transactionToMap) {
 		final Transaction transaction = new Transaction();
 		transaction.setInputSum(transactionToMap.getInputSum().getValue());
 		transaction.setOutputSum(transactionToMap.getOutputSum().getValue());
 		transaction.setTransactionHash(transactionToMap.getHashAsString());
-		if (CollectionUtils.isNotEmpty(transactionToMap.getInputs())) {
+		if (IndexProperties.isIndexTransactionDetails() && CollectionUtils.isNotEmpty(transactionToMap.getInputs())) {
 			transaction.setInputs(
 					transactionToMap
 					.getInputs()
@@ -45,8 +48,9 @@ public class PersistanceMapper {
 					.filter(to -> to != null)
 					.collect(Collectors.toSet())
 					);
+			transaction.getInputs().parallelStream().forEach(ti -> ti.setTransaction(transaction));
 		}
-		if (CollectionUtils.isNotEmpty(transactionToMap.getOutputs())) {
+		if (IndexProperties.isIndexTransactionDetails() && CollectionUtils.isNotEmpty(transactionToMap.getOutputs())) {
 			transaction.setOutputs(
 					transactionToMap
 					.getOutputs()
@@ -55,6 +59,7 @@ public class PersistanceMapper {
 					.filter(to -> to != null)
 					.collect(Collectors.toSet())
 					);
+			transaction.getOutputs().parallelStream().forEach(to -> to.setTransaction(transaction));
 		}
 		return transaction;
 	}

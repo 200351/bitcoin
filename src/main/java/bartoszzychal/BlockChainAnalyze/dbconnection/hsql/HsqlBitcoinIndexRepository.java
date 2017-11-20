@@ -18,13 +18,12 @@ import bartoszzychal.BlockChainAnalyze.dbconnection.impl.EntityManagerProvider;
 import bartoszzychal.BlockChainAnalyze.index.mapper.PersistanceMapper;
 import bartoszzychal.BlockChainAnalyze.index.persistance.BlockIndex;
 import bartoszzychal.BlockChainAnalyze.index.persistance.Transaction;
-import bartoszzychal.BlockChainAnalyze.index.persistance.TransactionInput;
-import bartoszzychal.BlockChainAnalyze.index.persistance.TransactionOutput;
+import bartoszzychal.BlockChainAnalyze.model.IndexProperties;
 
 public class HsqlBitcoinIndexRepository implements IBitCoinIndexRepository {
 
 	private static final int IN_LIMIT = 1001;
-	private final String ADDRESSES_HASH_PARAM = "blockHashParam";
+	private final String ADDRESSES_HASH_PARAM = "addressesHashParam";
 	private final String BLOCK_HASH_PARAM = "blockHashParam";
 	private final String BLOCK_START_PARAM = "blockStartParam";
 	private final String BLOCK_END_PARAM = "blockEndParam";
@@ -147,11 +146,11 @@ public class HsqlBitcoinIndexRepository implements IBitCoinIndexRepository {
 			LocalDateTime endDate = LocalDateTime.of(end, LocalTime.MAX);
 			final Query query = EntityManagerProvider.getEntityManager()
 					.createQuery("select bi from BlockIndex bi"
-							+ " inner join Transaction t"
-							+ " inner join TransactionOutput to"
+							+ " inner join bi.transactions t"
+							+ " inner join t.outputs to"
 							+ " where bi.generatedDate >= :" + BLOCK_START_PARAM
 							+ " and bi.generatedDate <= :" + BLOCK_END_PARAM
-							+ " and to.address in (:" + ADDRESSES_HASH_PARAM + ")"
+							+ " and to.address in :" + ADDRESSES_HASH_PARAM
 							+ " order by bi.generatedDate desc");
 			query.setParameter(BLOCK_START_PARAM, startDate);
 			query.setParameter(BLOCK_END_PARAM, endDate);
@@ -168,6 +167,32 @@ public class HsqlBitcoinIndexRepository implements IBitCoinIndexRepository {
 	}
 
 	@Override
+	public List<Transaction> readTransactionBlocks(LocalDateTime start, LocalDateTime end, List<String> addresses) {
+		List<Transaction> transactions = null;
+		if (start != null && end != null && CollectionUtils.isNotEmpty(addresses) && addresses.size() < IN_LIMIT) {
+			final Query query = EntityManagerProvider.getEntityManager()
+					.createQuery("select t from Transaction t"
+							+ " inner join t.blockIndex bi"
+							+ " inner join t.outputs to"
+							+ " where bi.generatedDate >= :" + BLOCK_START_PARAM
+							+ " and bi.generatedDate <= :" + BLOCK_END_PARAM
+							+ " and to.address in :" + ADDRESSES_HASH_PARAM
+							+ " order by bi.generatedDate desc");
+			query.setParameter(BLOCK_START_PARAM, start);
+			query.setParameter(BLOCK_END_PARAM, end);
+			query.setParameter(ADDRESSES_HASH_PARAM, addresses);
+			final List<Transaction> resultList = query.getResultList();
+			
+			EntityManagerProvider.beginTransaction();
+			if (CollectionUtils.isNotEmpty(resultList)) {
+				transactions = resultList;
+			}
+			EntityManagerProvider.commit();
+		}
+		return transactions;
+	}
+
+	@Override
 	public synchronized void createNewIndexForBlock(List<BlockIndex> blockIndex, boolean reindex) {
 		EntityManagerProvider.beginTransaction();
 		for (int i = 0; i < blockIndex.size(); i++) {
@@ -180,15 +205,40 @@ public class HsqlBitcoinIndexRepository implements IBitCoinIndexRepository {
 				EntityManagerProvider.getEntityManager().flush();
 			}
 			log.info(i + ".Persist block: " + index.getBlockHash());
-			EntityManagerProvider.getEntityManager().persist(index);
+			persistIndex(index);
 			if (i % BATCH_SIZE == 0) {
-				log.info(BATCH_SIZE + " Flush.");
+				log.info(BATCH_SIZE + " Block Flush.");
 				EntityManagerProvider.getEntityManager().flush();
 				EntityManagerProvider.getEntityManager().clear();
 			}
 		}
 		
 		EntityManagerProvider.commit();
+	}
+
+	private void persistIndex(BlockIndex index) {
+		if (index != null) {
+			EntityManagerProvider.getEntityManager().persist(index);
+			if (IndexProperties.isIndexTransaction()) {
+				Set<Transaction> transactions = index.getTransactions();
+				if (CollectionUtils.isNotEmpty(transactions)) {
+					int j = 0;
+					for (Transaction transaction : transactions) {
+						EntityManagerProvider.getEntityManager().persist(transaction);
+						if (IndexProperties.isIndexTransactionDetails()) {
+							transaction.getInputs().forEach(i -> EntityManagerProvider.getEntityManager().persist(i));
+							transaction.getOutputs().forEach(o -> EntityManagerProvider.getEntityManager().persist(o));
+							j++;
+							if (j % BATCH_SIZE == 0) {
+								log.info(BATCH_SIZE + "Transactions Flush.");
+								EntityManagerProvider.getEntityManager().flush();
+								EntityManagerProvider.getEntityManager().clear();
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 	
 }

@@ -7,4 +7,5 @@ import org.bitcoinj.core.Block;
 
 public interface IBlockChainReader {
 	List<Block> readBlockChainFromTo(LocalDate from, LocalDate to);
+	Block readBlock(String blockHash);
 }

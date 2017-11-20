@@ -49,6 +49,7 @@ public class InfoMapper {
 		Address address = null;
 		try {
 			address = t.getAddressFromP2PKHScript(MainNetParams.get());
+			address = address != null ? address : t.getAddressFromP2SH(MainNetParams.get());
 		} catch (Exception e) {
 			try {
 				address = t.getAddressFromP2SH(MainNetParams.get());

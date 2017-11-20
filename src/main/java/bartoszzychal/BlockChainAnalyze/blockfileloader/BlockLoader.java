@@ -8,23 +8,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.bitcoinj.core.Block;
-import org.bitcoinj.core.NetworkParameters;
+import org.bitcoinj.core.Context;
 import org.bitcoinj.core.ProtocolException;
 import org.bitcoinj.core.Utils;
 
 import bartoszzychal.BlockChainAnalyze.index.persistance.BlockIndex;
 
-import org.apache.log4j.Logger;
-
 public class BlockLoader {
 
-	private NetworkParameters params;
 	private static final Logger log = Logger.getLogger(BlockLoader.class);
 	private final Map<String, File> filesMap;
 
-    public BlockLoader(NetworkParameters params, List<File> files) {
-		this.params = params;
+    public BlockLoader(List<File> files) {
     	final Map<String, File> filesMap = new HashMap<>();
     	for (File file : files) {
 			filesMap.put(file.getName(), file);
@@ -53,7 +50,7 @@ public class BlockLoader {
 						bytes = new byte[(int) size];
 						currentFileStream.read(bytes, 0, (int) size);
 						try {
-							block = params.getDefaultSerializer().makeBlock(bytes);
+							block = Context.get().getParams().getDefaultSerializer().makeBlock(bytes);
 						} catch (ProtocolException e) {
 							System.out.println(e);
 						}

@@ -4,7 +4,7 @@ CREATE INDEX
 ON 
    transactionoutput (address) 
 TABLESPACE 
-   BLOCKINDEX;
+   BLOCKINDEX_DB;
    
 drop Index ix_in_address;
 CREATE INDEX 
@@ -12,7 +12,7 @@ CREATE INDEX
 ON 
    transactioninput (address) 
 TABLESPACE 
-   BLOCKINDEX;
+   BLOCKINDEX_DB;
    
 drop Index ix_block_gen_date;
 CREATE INDEX 
@@ -20,4 +20,4 @@ CREATE INDEX
 ON 
    blockindex (GENERATEDDATE) 
 TABLESPACE 
-   BLOCKINDEX;
+   BLOCKINDEX_DB;
